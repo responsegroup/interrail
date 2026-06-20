@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="nn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🚂 Interrail Reiseplanleggar</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script type="text/babel">
+const { useState, useMemo, useCallback } = React;
+/* Interrail Reiseplanleggar v8 */
+const _C=[
+["sion","Sion","🇨🇭",46.228,7.359,0,3,0,"Start"],["zermatt","Zermatt","🇨🇭",46.024,7.748,85,7,0,"Matterhorn"],
+["geneve","Genève","🇨🇭",46.204,6.143,145,7,"GVA","CERN"],["montreux","Montreux","🇨🇭",46.431,6.911,125,6,0,"GoldenPass"],
+["interlaken","Interlaken","🇨🇭",46.686,7.863,125,7,0,"Jungfrau"],["bern","Bern","🇨🇭",46.948,7.447,135,6,0,"Hovudstad"],
+["luzern","Luzern","🇨🇭",47.05,8.309,138,7,0,"Verkehrshaus!"],["zurich","Zürich","🇨🇭",47.377,8.542,150,7,"ZRH","ETH"],
+["basel","Basel","🇨🇭",47.559,7.589,140,7,"BSL","40+ museum"],["chur","Chur","🇨🇭",46.85,9.532,109,5,0,"Bernina start"],
+["stmoritz","St. Moritz","🇨🇭",46.497,9.838,143,6,0,"Glacier/Bernina"],
+["lauterbrunnen","Lauterbrunnen","🇨🇭",46.593,7.909,120,8,0,"72 fossar!"],["wengen","Wengen","🇨🇭",46.608,7.922,130,7,0,"Bilfri alpeby"],
+["lugano","Lugano","🇨🇭",46.003,8.951,125,6,0,"Gotthard"],["locarno","Locarno","🇨🇭",46.171,8.799,115,5,0,"Centovalli"],
+["innsbruck","Innsbruck","🇦🇹",47.263,11.401,148,8,0,"Nordkette"],["salzburg","Salzburg","🇦🇹",47.813,13.045,105,8,"SZG","Festung"],
+["linz","Linz","🇦🇹",48.306,14.286,92,5,0,"ArsElec"],["wien","Wien","🇦🇹",48.185,16.377,123,10,"VIE","Tech.Mus."],
+["graz","Graz","🇦🇹",47.073,15.417,101,7,"GRZ","32k våpen!"],["klagenfurt","Klagenfurt","🇦🇹",46.625,14.309,88,4,0,"Wörthersee"],
+["villach","Villach","🇦🇹",46.611,13.856,75,3,0,"Transit"],
+["munchen","München","🇩🇪",48.135,11.582,125,9,"MUC","DM!"],["nurnberg","Nürnberg","🇩🇪",49.452,11.077,106,6,"NUE","DB Museum"],
+["stuttgart","Stuttgart","🇩🇪",48.776,9.183,118,7,"STR","Merz+Porsche"],["frankfurt","Frankfurt","🇩🇪",50.111,8.682,120,5,"FRA","Knutepunkt"],
+["koln","Köln","🇩🇪",50.938,6.96,107,7,"CGN","Dom+Sjokolade"],["dusseldorf","Düsseldorf","🇩🇪",51.22,6.793,107,6,"DUS","Rheinufer"],
+["hannover","Hannover","🇩🇪",52.376,9.738,91,5,"HAJ","ICE-hub"],["hamburg","Hamburg","🇩🇪",53.551,9.993,113,7,"HAM","Mini W!"],
+["berlin","Berlin","🇩🇪",52.52,13.405,108,10,"BER","Museumsø"],["dresden","Dresden","🇩🇪",51.051,13.738,96,7,"DRS","Zwinger"],
+["leipzig","Leipzig","🇩🇪",51.34,12.375,86,6,0,"Bach"],["freiburg","Freiburg","🇩🇪",47.999,7.842,96,5,0,"Svartskogen"],
+["erfurt","Erfurt","🇩🇪",50.978,11.029,82,5,0,"ICE-hub"],["rostock","Rostock","🇩🇪",54.089,12.14,78,4,0,"Østersjøen"],
+["bolzano","Bolzano","🇮🇹",46.498,11.355,100,6,0,"Ötzi!"],["verona","Verona","🇮🇹",45.438,10.992,98,7,0,"Arena"],
+["venezia","Venezia","🇮🇹",45.441,12.316,130,9,"VCE","San Marco"],["padova","Padova","🇮🇹",45.407,11.876,85,5,0,"30min Venezia"],
+["bologna","Bologna","🇮🇹",44.494,11.347,95,6,"BLQ","Mat-by"],["firenze","Firenze","🇮🇹",43.771,11.254,114,9,"FLR","Uffizi"],
+["roma","Roma","🇮🇹",41.901,12.502,118,10,"FCO","Colosseum"],["napoli","Napoli","🇮🇹",40.852,14.268,80,7,"NAP","Pompeii"],
+["milano","Milano","🇮🇹",45.464,9.19,113,8,"MXP","Duomo"],["torino","Torino","🇮🇹",45.07,7.687,90,6,"TRN","Egyptisk museum"],
+["trieste","Trieste","🇮🇹",45.65,13.777,90,5,0,"Miramare"],["tirano","Tirano","🇮🇹",46.217,10.169,73,4,0,"Bernina slutt"],
+["ljubljana","Ljubljana","🇸🇮",46.058,14.512,95,8,"LJU","Castle"],["bled","Lake Bled","🇸🇮",46.369,14.11,86,7,0,"Øykirke"],
+["maribor","Maribor","🇸🇮",46.555,15.646,70,4,0,"Vinby"],["zagreb","Zagreb","🇭🇷",45.815,15.982,74,6,0,"Broken Rel."],
+["split","Split","🇭🇷",43.509,16.44,75,7,"SPU","Diocletian"],["rijeka","Rijeka","🇭🇷",45.327,14.442,71,4,0,"Hamn"],
+["sarajevo","Sarajevo","🇧🇦",43.856,18.413,55,6,0,"Baščaršija"],["budapest","Budapest","🇭🇺",47.498,19.04,78,9,"BUD","Thermalbad"],
+["pecs","Pécs","🇭🇺",46.072,18.233,54,5,0,"Kultur"],["bratislava","Bratislava","🇸🇰",48.159,17.106,60,5,0,"1t frå Wien"],
+["zilina","Žilina","🇸🇰",49.224,18.74,56,4,0,"Tatrane"],["kosice","Košice","🇸🇰",48.716,21.261,59,6,"KSC","Katedral"],
+["poprad","Poprad-Tatry","🇸🇰",49.06,20.298,57,6,0,"Høge Tatra"],
+["praha","Praha","🇨🇿",50.083,14.417,83,9,"PRG","Castle"],["brno","Brno","🇨🇿",49.195,16.607,68,5,0,"Špilberk"],
+["olomouc","Olomouc","🇨🇿",49.594,17.251,61,6,0,"UNESCO"],["cesky_krumlov","Č.Krumlov","🇨🇿",48.811,14.317,66,7,0,"Eventyrby"],
+["krakow","Kraków","🇵🇱",50.065,19.945,62,8,"KRK","Wawel"],["warszawa","Warszawa","🇵🇱",52.23,21.012,70,7,"WAW","Copernicus"],
+["wroclaw","Wrocław","🇵🇱",51.097,17.037,60,6,0,"Dvergar!"],["gdansk","Gdańsk","🇵🇱",54.352,18.647,63,7,"GDN","Wizz Air!"],
+["poznan","Poznań","🇵🇱",52.407,16.925,58,5,0,"Gamleby"],["amsterdam","Amsterdam","🇳🇱",52.379,4.9,135,9,"AMS","Rijksmuseum"],
+["bruxelles","Bruxelles","🇧🇪",50.847,4.357,110,7,"BRU","Atomium"],
+["paris","Paris","🇫🇷",48.857,2.352,130,10,"CDG","Louvre"],["strasbourg","Strasbourg","🇫🇷",48.573,7.752,100,6,0,"EU-parl."],
+["lyon","Lyon","🇫🇷",45.764,4.835,105,7,"LYS","Mat-by"],["marseille","Marseille","🇫🇷",43.296,5.37,100,6,"MRS","Calanques"],
+["nice","Nice","🇫🇷",43.71,7.262,110,7,"NCE","Côte d'Azur"],
+["barcelona","Barcelona","🇪🇸",41.389,2.159,108,9,"BCN","Sagrada"],["madrid","Madrid","🇪🇸",40.417,-3.704,95,8,"MAD","Prado"],
+["kobenhavn","København","🇩🇰",55.676,12.568,128,9,"CPH","Tivoli"],["aarhus","Aarhus","🇩🇰",56.153,10.21,109,6,0,"ARoS"],
+["stockholm","Stockholm","🇸🇪",59.329,18.069,130,8,"ARN","Vasa"],["goteborg","Göteborg","🇸🇪",57.709,11.974,115,6,"GOT","Liseberg"],
+["malmo","Malmö","🇸🇪",55.605,13.0,110,5,0,"Øresund"],["oslo","Oslo","🇳🇴",59.913,10.752,140,7,"OSL","Munch"],
+["vilnius","Vilnius","🇱🇹",54.687,25.28,58,7,"VNO","Gamleby"],["riga","Riga","🇱🇻",56.95,24.105,58,7,"RIX","Art Nouveau"],
+["tallinn","Tallinn","🇪🇪",59.437,24.753,68,8,"TLL","Middelalder"],
+["bucuresti","București","🇷🇴",44.432,26.104,54,6,"OTP","Folkets palass"],["beograd","Beograd","🇷🇸",44.787,20.457,47,6,"BEG","Kalemegdan"],
+["lisboa","Lisboa","🇵🇹",38.722,-9.139,85,9,"LIS","Trikk 28"],["porto","Porto","🇵🇹",41.149,-8.611,70,8,"OPO","Portvin"],
+["athen","Athen","🇬🇷",37.972,23.727,75,9,"ATH","Akropolis"],["istanbul","Istanbul","🇹🇷",41.009,28.978,55,9,"IST","Hagia Sophia"],
+];
+const C=_C.map(c=>({id:c[0],n:c[1],f:c[2],lat:c[3],lng:c[4],cost:c[5],sc:c[6],ap:c[7],no:c[8]}));
+const CN=[
+["sion","zermatt",2,4],["sion","bern",1.5,0],["sion","montreux",1.5,0],["sion","geneve",2,0],
+["geneve","montreux",1,0],["geneve","bern",2,0],["geneve","lyon",2,3],["geneve","paris",3.5,3],
+["montreux","interlaken",3,4],["interlaken","bern",1,0],["interlaken","luzern",2,0],["interlaken","lauterbrunnen",.3,4],
+["lauterbrunnen","wengen",.2,4],["bern","zurich",1,1],["bern","luzern",1,0],["luzern","zurich",.75,0],["luzern","milano",3.5,0],["luzern","lugano",2.5,0],
+["zurich","chur",1.25,0],["zurich","innsbruck",3.5,0],["zurich","munchen",3.5,1],["zurich","stuttgart",2.5,1],
+["zurich","freiburg",2,0],["zurich","paris",4,3],["zurich","berlin",8,2],["zurich","basel",.9,1],
+["basel","bern",1,1],["basel","freiburg",.75,0],["basel","strasbourg",1.25,1],["basel","frankfurt",3,1],["basel","paris",3.25,3],
+["chur","stmoritz",2,4],["chur","tirano",4.25,4],["stmoritz","tirano",2.5,4],["stmoritz","chur",2,4],["tirano","milano",2.5,0],
+["lugano","locarno",.5,0],["lugano","milano",1.25,1],
+["innsbruck","munchen",1.75,1],["innsbruck","salzburg",1.75,0],["innsbruck","bolzano",1.25,0],
+["salzburg","munchen",1.5,1],["salzburg","wien",2.4,1],["salzburg","linz",1.25,0],
+["linz","wien",1.25,1],["wien","bratislava",1,1],["wien","graz",2.6,0],
+["wien","budapest",2.7,1],["wien","praha",4,1],["wien","brno",1.5,0],
+["wien","hamburg",11,2],["wien","amsterdam",13,2],["wien","roma",11,2],["wien","venezia",7.5,2],
+["graz","villach",2.5,0],["graz","ljubljana",3,0],["graz","maribor",1,0],["graz","klagenfurt",1,0],
+["klagenfurt","villach",.5,0],["villach","ljubljana",2,0],["villach","venezia",4,0],
+["munchen","nurnberg",1,1],["munchen","stuttgart",2.25,1],["munchen","praha",5.5,0],
+["nurnberg","erfurt",1.25,1],["nurnberg","frankfurt",2,1],["nurnberg","stuttgart",2,1],["nurnberg","praha",4,0],["nurnberg","leipzig",3,1],
+["erfurt","berlin",1.75,1],["erfurt","leipzig",.75,1],["erfurt","frankfurt",2.5,1],
+["stuttgart","frankfurt",1.25,1],["stuttgart","freiburg",2,0],["stuttgart","paris",3.5,3],
+["frankfurt","koln",1,1],["frankfurt","berlin",4,1],["frankfurt","hannover",2.25,1],["frankfurt","paris",4,3],
+["koln","dusseldorf",.5,1],["koln","amsterdam",2.75,1],["koln","bruxelles",2,1],["koln","paris",3.5,3],
+["dusseldorf","amsterdam",2.5,1],["hannover","hamburg",1.25,1],["hannover","berlin",1.75,1],["hannover","koln",2.75,1],
+["hamburg","berlin",1.75,1],["hamburg","kobenhavn",4.75,1],["hamburg","rostock",2,0],["hamburg","amsterdam",5.5,2],["hamburg","stockholm",12,2],
+["berlin","dresden",2,1],["berlin","leipzig",1.25,1],["berlin","praha",4.5,1],["berlin","amsterdam",6.5,1],["berlin","warszawa",5.5,1],["berlin","paris",8,2],["berlin","wien",10,2],
+["dresden","praha",2.25,0],["leipzig","dresden",1.25,1],["rostock","berlin",2.5,0],["freiburg","strasbourg",1.5,0],
+["bolzano","innsbruck",1.25,0],["bolzano","verona",1.5,0],
+["verona","venezia",1.25,1],["verona","milano",1.5,1],["verona","bologna",.9,1],
+["venezia","padova",.5,0],["venezia","bologna",1.5,1],["venezia","firenze",2,1],["venezia","trieste",2,0],
+["padova","bologna",1.25,1],["bologna","firenze",.6,1],["bologna","roma",2,1],["bologna","milano",1,1],
+["firenze","roma",1.5,3],["roma","napoli",1.1,3],["roma","milano",3,3],
+["milano","torino",.75,1],["milano","zurich",3.5,1],["milano","geneve",4,0],
+["torino","paris",5.5,3],["torino","lyon",4,3],
+["trieste","rijeka",2,0],["trieste","ljubljana",2.5,0],
+["ljubljana","bled",1,0],["ljubljana","zagreb",2.25,0],["ljubljana","maribor",2,0],["ljubljana","villach",2,0],
+["zagreb","budapest",6,0],["zagreb","rijeka",3.5,0],["zagreb","split",5.5,0],["zagreb","sarajevo",9,0],["zagreb","beograd",6,0],
+["split","sarajevo",8,0],["rijeka","trieste",2,0],
+["budapest","bratislava",2.5,1],["budapest","krakow",7,0],["budapest","praha",7,0],["budapest","beograd",8,0],["budapest","bucuresti",10,2],["budapest","pecs",3,0],["pecs","zagreb",5,0],
+["bratislava","brno",1.5,0],["bratislava","zilina",2.5,0],["bratislava","kosice",5,0],
+["zilina","kosice",3,0],["zilina","poprad",1.5,0],["poprad","kosice",1.5,0],
+["praha","brno",2.5,0],["praha","olomouc",2.25,0],["praha","dresden",2.25,0],["praha","krakow",6.5,0],["praha","zurich",9,2],
+["brno","olomouc",1.25,0],["olomouc","zilina",2.5,0],
+["krakow","warszawa",2.5,1],["krakow","wien",6,0],["krakow","wroclaw",3.5,0],
+["warszawa","gdansk",3,1],["warszawa","poznan",2.5,1],["warszawa","wroclaw",4,0],["warszawa","vilnius",9,0],["warszawa","berlin",5.5,1],
+["wroclaw","berlin",4.5,1],["wroclaw","praha",4,0],["poznan","berlin",3,1],["gdansk","warszawa",3,1],["gdansk","berlin",5.5,0],
+["amsterdam","bruxelles",2,1],["bruxelles","paris",1.5,3],
+["paris","lyon",2,3],["paris","strasbourg",1.75,3],["paris","marseille",3.5,3],["paris","barcelona",6.5,3],
+["lyon","marseille",1.75,3],["lyon","geneve",2,3],["lyon","torino",4,3],
+["marseille","nice",2.5,0],["nice","milano",4.5,0],
+["barcelona","madrid",2.5,3],
+["kobenhavn","malmo",.5,0],["kobenhavn","aarhus",3,0],["kobenhavn","stockholm",5,1],["kobenhavn","hamburg",4.75,1],
+["malmo","goteborg",2.5,0],["goteborg","oslo",3.5,0],["goteborg","stockholm",3,1],["oslo","stockholm",6,0],
+["vilnius","riga",4.5,0],["riga","tallinn",4.5,0],["tallinn","stockholm",16,2],
+["beograd","bucuresti",12,0],["bucuresti","budapest",10,2],
+["lisboa","porto",3,1],["madrid","lisboa",10,2],
+["athen","istanbul",12,0],["bucuresti","istanbul",10,0],["beograd","istanbul",20,0],
+];
+const ADJ={};CN.forEach(([a,b,h,t])=>{if(!ADJ[a])ADJ[a]={};if(!ADJ[b])ADJ[b]={};const v={h,t};if(!ADJ[a][b]||h<ADJ[a][b].h)ADJ[a][b]=v;if(!ADJ[b][a]||h<ADJ[b][a].h)ADJ[b][a]=v;});
+const SCENIC=[
+{id:"bernina",n:"🏔️ Bernina",c:["chur","stmoritz","tirano"],d:"UNESCO. 4t.",cl:"#d94520"},
+{id:"glacier",n:"❄️ Glacier",c:["zermatt","chur","stmoritz"],d:"8t, 291 bruer.",cl:"#2563eb"},
+{id:"goldenpass",n:"🌄 GoldenPass",c:["montreux","interlaken","luzern"],d:"Belle Époque.",cl:"#059669"},
+{id:"jungfrau",n:"🏔️ Jungfrau",c:["interlaken","lauterbrunnen","wengen"],d:"Tannhjulbane!",cl:"#1d5bbf"},
+{id:"gotthard",n:"🚂 Gotthard",c:["luzern","lugano"],d:"Båt+tog.",cl:"#7c3aed"},
+{id:"centovalli",n:"🌿 Centovalli",c:["locarno","tirano"],d:"100 dalar.",cl:"#059669"},
+{id:"luzint",n:"🏞️ Luz–Interlaken",c:["luzern","interlaken"],d:"5 innsjøar!",cl:"#16a34a"},
+{id:"semmering",n:"🏛️ Semmering",c:["wien","graz"],d:"UNESCO 1854.",cl:"#e8a317"},
+{id:"rhine",n:"🏰 Rhindalen",c:["koln","frankfurt"],d:"Borgar.",cl:"#16a34a"},
+{id:"baltic",n:"🌊 Baltikum",c:["warszawa","vilnius","riga","tallinn"],d:"Gamleby-ruta.",cl:"#db2777"},
+{id:"bergen1",n:"✈️ Bergen billeg",c:["krakow","wien","munchen","berlin","kobenhavn"],d:"Wizz Air+tog.",cl:"#c53d1b"},
+{id:"italia",n:"🇮🇹 Italia",c:["venezia","firenze","roma","napoli","milano"],d:"Frecciarossa.",cl:"#16a34a"},
+{id:"nightjet",n:"🌙 NightJet",c:["wien","hamburg","amsterdam"],d:"Sov på toget!",cl:"#7c3aed"},
+{id:"scandi",n:"🇸🇪 Skandinavia",c:["kobenhavn","malmo","goteborg","oslo","stockholm"],d:"Øresund+fjord.",cl:"#0ea5e9"},
+];
+const ATT=[
+["a1","Tech.Mus.",48.19,16.32,"Wien","tech","22,000m²"],["a2","Schönbrunn",48.185,16.312,"Wien","arch","Keiserpalass"],
+["a3","Styrian Armoury",47.07,15.44,"Graz","history","32k våpen!"],["a4","Ljubljana Castle",46.049,14.508,"Ljubljana","history","Taubane"],
+["a5","Festung",47.795,13.048,"Salzburg","history","Festning"],["a6","Haus der Natur",47.802,13.044,"Salzburg","science","Romhall"],
+["a7","Bergisel",47.249,11.396,"Innsbruck","arch","Zaha Hadid"],["a8","Deutsches Museum",48.13,11.583,"München","tech","Verdas største!"],
+["a9","BMW Welt",48.177,11.556,"München","tech","Gratis!"],["a10","Technical Museum",50.097,14.425,"Praha","tech","Fly, tog"],
+["a11","Prague Castle",50.091,14.4,"Praha","history","Største borg"],["a12","Széchenyi",47.519,19.082,"Budapest","nature","Termalbad"],
+["a13","Parlamentet",47.507,19.045,"Budapest","arch","UNESCO"],["a14","Wawel",50.054,19.935,"Kraków","history","Kongeleg slott"],
+["a15","Wieliczka",49.984,20.055,"Kraków","history","Saltgruve!"],["a16","Ötzi",46.499,11.351,"Bolzano","science","5300 år!"],
+["a17","Verkehrshaus",47.053,8.337,"Luzern","tech","Transport!"],["a18","ArsElec",48.309,14.285,"Linz","tech","Framtid"],
+["a19","Mercedes-Benz",48.788,9.234,"Stuttgart","tech","160 bilar"],["a20","Porsche",48.834,9.152,"Stuttgart","tech","Sportsbil"],
+["a21","DB Museum",49.446,11.085,"Nürnberg","tech","Jernbane!"],["a22","Museumsø",52.517,13.402,"Berlin","art","UNESCO"],
+["a23","Miniatur Wunderland",53.544,9.989,"Hamburg","tech","Modelljernbane!"],["a24","Rijksmuseum",52.36,4.885,"Amsterdam","art","Rembrandt"],
+["a25","Anne Frank",52.375,4.884,"Amsterdam","history","WWII"],["a26","Colosseum",41.89,12.492,"Roma","history","Amfiteater"],
+["a27","Vatikanmusea",41.906,12.454,"Roma","art","Sixtinske"],["a28","Uffizi",43.768,11.255,"Firenze","art","Botticelli"],
+["a29","Duomo",43.773,11.256,"Firenze","arch","Brunelleschi"],["a30","Louvre",48.861,2.336,"Paris","art","Mest besøkte"],
+["a31","Eiffel",48.858,2.294,"Paris","arch","324m"],["a32","Sagrada",41.404,2.174,"Barcelona","arch","Gaudí"],
+["a33","Tivoli",55.674,12.569,"København","nature","Sidan 1843"],["a34","Vasa-museet",59.328,18.091,"Stockholm","history","1628-skip"],
+["a35","Tallinn Old Town",59.438,24.745,"Tallinn","history","Middelalder"],["a36","Art Nouveau",56.955,24.115,"Riga","arch","800+ bygg"],
+["a37","Copernicus",52.242,21.028,"Warszawa","science","Interaktivt"],["a38","Da Vinci",45.463,9.171,"Milano","tech","Leonardo"],
+["a39","Pompeii",40.75,14.485,"Napoli","history","Under oske"],["a40","CERN",46.234,6.055,"Genève","science","Partiklar!"],
+["a41","Kunstmuseum",47.554,7.593,"Basel","art","Sidan 1661"],["a42","Vitra Design",47.605,7.611,"Basel","arch","Gehry+Hadid"],
+["a43","Einstein",46.948,7.44,"Bern","science","Relativitet!"],["a44","Kunsthaus",47.37,8.548,"Zürich","art","Munch"],
+["a45","Palazzo Ducale",45.434,12.34,"Venezia","history","Sighs Bridge"],["a46","Zwinger",51.053,13.734,"Dresden","art","Madonna"],
+["a47","Kölner Dom",50.941,6.958,"Köln","arch","157m!"],["a48","Sjokolademuseum",50.932,6.964,"Köln","tech","Lindt!"],
+["a49","Atomium",50.895,4.342,"Bruxelles","arch","102m"],["a50","Vigeland",59.927,10.7,"Oslo","art","212 skulpturar"],
+["a51","Munchmuseet",59.907,10.756,"Oslo","art","Skrik"],["a52","Prado",40.414,-3.692,"Madrid","art","Goya"],
+["a53","Arena",45.439,10.994,"Verona","history","Opera!"],["a54","Staubbach",46.593,7.906,"Lauterbrunnen","nature","297m! Tolkien"],
+["a55","Jungfraujoch",46.547,7.985,"Wengen","nature","3454m!"],["a56","Swissminiatur",45.998,8.943,"Lugano","tech","128 mini"],
+["a57","Café Schober",47.371,8.543,"Zürich","food","1842. Sjokolade"],
+["a58","Zeughauskeller",47.374,8.539,"Zürich","food","1487. Rösti"],
+["a59","Rosengarten",46.951,7.454,"Bern","nature","Panorama!"],
+["a60","Kornhauskeller",46.949,7.449,"Bern","food","Berner Platte!"],
+["a61","Altes Tramdepot",46.948,7.456,"Bern","food","Bryggjeri"],
+["a62","Château de Chillon",46.414,6.927,"Montreux","history","Vassborgfrå 1100-talet"],
+["a63","Harder Kulm",46.699,7.862,"Interlaken","nature","1322m panorama"],
+["a64","Trümmelbachfälle",46.576,7.912,"Lauterbrunnen","nature","10 fossar i fjell"],
+["a65","Kapellbrücke",47.051,8.308,"Luzern","history","Trebru (1333)"],
+["a66","Fondation Beyeler",47.591,7.565,"Basel","art","Monet, Warhol"],
+["a67","Café Spitz",47.557,7.588,"Basel","food","Rhinen. Rösti"],
+["a68","Wirtschaft Neumarkt",47.371,8.545,"Zürich","food","Fondue! Tradisjonell."],
+["a69","Café Central",47.376,8.54,"Zürich","food","Sidan 1890. Einstein sat her"],
+["a70","Naschmarkt",48.199,16.363,"Wien","food","Matmarknad 1780"],
+["a71","Café Central Wien",48.211,16.365,"Wien","food","1876. Trotsky+Freud"],
+["a72","Figlmüller",48.208,16.374,"Wien","food","Beste Schnitzel!"],
+["a73","Stiftskeller St Peter",47.797,13.044,"Salzburg","food","Eldste restaurant (803!)"],
+["a74","Augustiner Bräu",47.803,13.035,"Salzburg","food","Klosterbryggjeri"],
+["a75","Festung Hohensalzburg",47.795,13.048,"Salzburg","arch","800m taubane til toppen"],
+["a76","Goldenes Dachl",47.268,11.394,"Innsbruck","history","2657 gullfliser (1500)"],
+["a77","Stiftskeller Innsbruck",47.263,11.395,"Innsbruck","food","Tiroler Gröstl!"],
+["a78","Hofbräuhaus",48.138,11.58,"München","food","Ølhall sidan 1589!"],
+["a79","Augustiner-Keller",48.147,11.547,"München","food","5000 plassar ølhage"],
+["a80","Viktualsmarkt",48.135,11.577,"München","food","Matmarknad 1807"],
+["a81","Nürnberger Bratwurst",49.454,11.077,"Nürnberg","food","Nürnberger-pølser!"],
+["a82","Markthalle Stuttgart",48.776,9.178,"Stuttgart","food","Jugendstil (1914)"],
+["a83","Brauhaus Früh",50.94,6.957,"Köln","food","Kölsch sidan 1904"],
+["a84","Berliner Currywurst",52.507,13.382,"Berlin","food","Sidan 1930"],
+["a85","Fischmarkt Hamburg",53.545,9.967,"Hamburg","food","Sidan 1703"],
+["a86","Kaiserliche Schatzkammer",48.206,16.366,"Wien","history","Keisarkrona"],
+["a87","Prater",48.216,16.396,"Wien","nature","Riesenrad (1897)"],
+["a88","Belvedere",48.192,16.381,"Wien","art","Klimt: Kysset"],
+["a89","Kunsthistorisches",48.204,16.361,"Wien","art","Habsburg-samlingar"],
+["a90","Torre de Belém",38.691,-9.216,"Lisboa","history","Sjøfart. UNESCO"],
+["a91","Pastéis de Belém",38.698,-9.203,"Lisboa","food","Originale pastéis sidan 1837!"],
+["a92","Trikk 28",38.714,-9.135,"Lisboa","arch","Ikonisk gul trikk gjennom gamleby"],
+["a93","Livraria Lello",41.147,-8.615,"Porto","arch","HP-inspirert bokhandel"],
+["a94","Port Wine Cellars",41.137,-8.617,"Porto","food","Sandeman, Taylor's. Smak gratis!"],
+["a95","Akropolis",37.971,23.726,"Athen","history","Parthenon. 2500 år"],
+["a96","Plaka",37.973,23.73,"Athen","food","Gamleby. Taverna To Kafeneio"],
+["a97","Hagia Sophia",41.009,28.98,"Istanbul","history","537 e.Kr. Moské+museum"],
+["a98","Grand Bazaar",41.011,28.968,"Istanbul","food","4000+ butikkar. Tyrkisk kaffe!"],
+].map(a=>({id:a[0],n:a[1],lat:a[2],lng:a[3],ci:a[4],ty:a[5],d:a[6]}));
+const ATYPES=[{k:"tech",l:"🔧 Teknikk",c:"#c53d1b"},{k:"history",l:"🏛️ Historie",c:"#7c3aed"},{k:"science",l:"🔬 Vitskap",c:"#2563eb"},{k:"arch",l:"🏗️ Arkitektur",c:"#059669"},{k:"art",l:"🎨 Kunst",c:"#db2777"},{k:"nature",l:"🏔️ Natur",c:"#16a34a"},{k:"food",l:"🍽️ Mat/kafé",c:"#d97706"}];
+const FLY={krakow:40,gdansk:58,vilnius:60,kobenhavn:80,berlin:90,amsterdam:120,munchen:130,warszawa:80,budapest:110,wien:120,praha:110,roma:120,stockholm:80,barcelona:130,hamburg:100,paris:130,milano:120,basel:110,geneve:100};
+const COL={m:"#c53d1b",s:"#1d5bbf",e:"#047857"};const TCOL={0:"#888",1:"#c53d1b",2:"#7c3aed",3:"#d94520",4:"#059669"};
+const TNAME={0:"Vanleg",1:"Høgfart 🚄",2:"Nattog 🌙",3:"HST+res ®",4:"Scenic 🏔️"};
+const DN=["Søn","Mån","Tir","Ons","Tor","Fre","Lau"];const MN=["Jan","Feb","Mar","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Des"];
+const fmt=n=>"€"+Math.round(n);
+function dlGPX(route){const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;");const cs=route.map(id=>C.find(c=>c.id===id)).filter(Boolean);if(!cs.length)return;let g='<?xml version="1.0"?>\n<gpx version="1.1" creator="Interrail" xmlns="http://www.topografix.com/GPX/1/1">\n';cs.forEach(c=>{g+=`<wpt lat="${c.lat}" lon="${c.lng}"><name>${esc(c.f+" "+c.n)}</name><desc>${esc(c.no||"")}</desc></wpt>\n`;});g+='<trk><name>Interrail</name><trkseg>\n';cs.forEach(c=>{g+=`<trkpt lat="${c.lat}" lon="${c.lng}"/>\n`;});g+='</trkseg></trk></gpx>';const b=new Blob([g],{type:"application/gpx+xml"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download="interrail.gpx";a.click();URL.revokeObjectURL(u);}
+const bookUrl=(n,ci,co)=>`https://www.booking.com/searchresults.html?ss=${encodeURIComponent(n)}${ci?"&checkin="+ci+"&checkout="+co+"&group_adults=1":""}`;
+function dijkstra(fr,to){const d={},Q=new Set(C.map(c=>c.id));C.forEach(c=>{d[c.id]=Infinity;});d[fr]=0;while(Q.size>0){let u=null;Q.forEach(v=>{if(!u||d[v]<d[u])u=v;});if(u===to||d[u]===Infinity)break;Q.delete(u);if(ADJ[u])Object.entries(ADJ[u]).forEach(([v,w])=>{if(Q.has(v)&&d[u]+w.h<d[v])d[v]=d[u]+w.h;});}return{dist:d[to]};}
+function getConn(a,b){return ADJ[a]?.[b]||null;}
+const geo=(a,b)=>{const ca=C.find(x=>x.id===a),cb=C.find(x=>x.id===b);if(!ca||!cb)return 999;const dy=ca.lat-cb.lat,dx=(ca.lng-cb.lng)*Math.cos(ca.lat*Math.PI/180);return Math.sqrt(dy*dy+dx*dx);};
+function optimizeRoute(ids,sId,eId){
+  const wp=ids.filter(id=>id!==sId&&id!==eId);if(!wp.length)return[sId,eId];
+  const sc=C.find(x=>x.id===sId),ec=C.find(x=>x.id===eId);if(!sc||!ec)return[sId,...wp,eId];
+  const ang=Math.atan2(ec.lat-sc.lat,ec.lng-sc.lng);
+  const sorted=wp.map(id=>{const c=C.find(x=>x.id===id);if(!c)return{id,p:0};const dx=c.lng-sc.lng,dy=c.lat-sc.lat;return{id,p:dx*Math.cos(ang)+dy*Math.sin(ang)};}).sort((a,b)=>a.p-b.p).map(s=>s.id);
+  let r=[sId,...sorted,eId];
+  let imp=true,it=0;while(imp&&it<50){imp=false;it++;for(let i=1;i<r.length-2;i++){for(let j=i+1;j<r.length-1;j++){
+    if(geo(r[i-1],r[i])+geo(r[j],r[j+1])>geo(r[i-1],r[j])+geo(r[i],r[j+1])+0.01){
+      r=[...r.slice(0,i),...r.slice(i,j+1).reverse(),...r.slice(j+1)];imp=true;}}}}
+  return r;
+}
+function topoFeature(topo,obj){const arcs=topo.arcs,tf=topo.transform,sc=tf?.scale||[1,1],tr=tf?.translate||[0,0];
+function dA(i){const arc=arcs[i<0?~i:i],co=[];let x=0,y=0;for(const p of arc){x+=p[0];y+=p[1];co.push([x*sc[0]+tr[0],y*sc[1]+tr[1]]);}return i<0?co.reverse():co;}
+function dR(ring){let co=[];for(const i of ring){const a=dA(i);if(co.length)a.shift();co=co.concat(a);}return co;}
+return{type:"FeatureCollection",features:obj.geometries.map(g=>{let gm=null;
+if(g.type==="Polygon")gm={type:"Polygon",coordinates:g.arcs.map(dR)};
+else if(g.type==="MultiPolygon")gm={type:"MultiPolygon",coordinates:g.arcs.map(a=>a.map(dR))};
+return{type:"Feature",id:g.id,properties:{},geometry:gm};}).filter(f=>f.geometry)};}
+const EU_IDS=new Set(["756","040","276","380","705","191","348","703","203","616","528","056","250","724","208","440","428","233","826","578","752","246","642","100","688","499","070","008","807","804","112","498","620","300","792"]);
+
+function Map({rc,selId,onSel,zoom,sC,eC,showA,aF,sA,onSA,cTime,onAdd,onLine,selLeg}){
+const[gD,setGD]=useState(null);const w=720,h=480;
+const[_mInit]=useState(()=>{setTimeout(()=>{fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(r=>r.json()).then(t=>{setGD(topoFeature(t,t.objects.countries).features.filter(f=>EU_IDS.has(String(f.id))));}).catch(()=>{});},0);return 1;});
+const proj=useMemo(()=>{const pts=rc.length>1?rc:[C.find(c=>c.id==="wien")];const la=pts.map(p=>p.lat),lo=pts.map(p=>p.lng);const cL=(Math.min(...la)+Math.max(...la))/2,cO=(Math.min(...lo)+Math.max(...lo))/2;const sp=Math.max(Math.max(...la)-Math.min(...la),(Math.max(...lo)-Math.min(...lo))*.65,3);return d3.geoMercator().center([cO,cL]).scale(Math.min(w,h)/sp*(28+zoom*7)).translate([w/2,h/2]);},[rc,zoom]);
+const pg=useMemo(()=>d3.geoPath().projection(proj),[proj]);
+const pj=useCallback((la,lo)=>{const p=proj([lo,la]);return p?{x:p[0],y:p[1]}:{x:0,y:0};},[proj]);
+const segs=[];for(let i=0;i<rc.length-1;i++){const a=pj(rc[i].lat,rc[i].lng),b=pj(rc[i+1].lat,rc[i+1].lng);const cn=getConn(rc[i].id,rc[i+1].id);segs.push({...a,x2:b.x,y2:b.y,t:cn?.h,tp:cn?.t||0,i});}
+return <svg viewBox={`0 0 ${w} ${h}`} style={{width:"100%",height:"auto",display:"block",background:"#b8d0e4",borderRadius:8}}>
+  {gD?gD.map((f,i)=>{const d=pg(f);return d?<path key={f.id||i} d={d} fill="#e6ebe0" stroke="#b0b8a8" strokeWidth={.5}/>:null;}):
+    <text x={w/2} y={h/2} textAnchor="middle" fill="#888" fontSize={11}>Lastar kart...</text>}
+  {C.filter(c=>!rc.find(r=>r.id===c.id)).map(c=>{const p=pj(c.lat,c.lng);if(p.x<-10||p.x>w+10||p.y<-10||p.y>h+10)return null;
+    return <g key={"u"+c.id} onClick={e=>{e.stopPropagation();onAdd(c.id);}} style={{cursor:"pointer"}}><circle cx={p.x} cy={p.y} r={3} fill="#bbb" opacity={.35}/><text x={p.x} y={p.y-5} textAnchor="middle" fill="#aaa" fontSize={5} style={{userSelect:"none",paintOrder:"stroke",stroke:"#e6ebe0",strokeWidth:1}}>{c.n}</text></g>;})}
+  {segs.map((s,i)=>{const col=TCOL[s.tp];const dash=s.tp===2?"4 3":s.tp===4?"6 2":"none";const isSel=selLeg===i;
+    return <g key={i} onClick={e=>{e.stopPropagation();onLine(i);}} style={{cursor:"pointer"}}>
+    <line x1={s.x} y1={s.y} x2={s.x2} y2={s.y2} stroke={col} strokeWidth={isSel?8:5} strokeOpacity={isSel?.3:.12} strokeLinecap="round"/>
+    <line x1={s.x} y1={s.y} x2={s.x2} y2={s.y2} stroke={col} strokeWidth={s.tp>=1?3:2} strokeOpacity={.85} strokeLinecap="round" strokeDasharray={dash}/>
+    {s.t&&<text x={(s.x+s.x2)/2} y={(s.y+s.y2)/2-5} textAnchor="middle" fontSize={6} fill="#555" fontWeight={600} style={{paintOrder:"stroke",stroke:"#e6ebe0",strokeWidth:2}}>{s.t}t</text>}
+    </g>;})}
+  {showA&&(()=>{const ns=new Set(rc.map(c=>c.n));return ATT.filter(a=>ns.has(a.ci)&&(!aF.length||aF.includes(a.ty))).map(a=>{const p=pj(a.lat,a.lng);const tc=ATYPES.find(t=>t.k===a.ty)?.c||"#888";return <g key={a.id} onClick={e=>{e.stopPropagation();onSA(a);}} style={{cursor:"pointer"}}>
+      {sA?.id===a.id&&<circle cx={p.x} cy={p.y} r={8} fill="none" stroke={tc} strokeWidth={1.5} opacity={.5}/>}
+      <circle cx={p.x} cy={p.y} r={4} fill="white" stroke={tc} strokeWidth={1.5}/><circle cx={p.x} cy={p.y} r={2} fill={tc}/></g>;});})()}
+  {rc.map((c,i)=>{const p=pj(c.lat,c.lng);const iS=selId===c.id;const costCol=c.cost<70?"#16a34a":c.cost<110?"#d97706":"#dc2626";const col=c.id===sC?COL.s:c.id===eC?COL.e:COL.m;const r=iS?10:6.5;
+    return <g key={c.id+i} onClick={e=>{e.stopPropagation();onSel(c.id);}} style={{cursor:"pointer"}}>
+      {iS&&<circle cx={p.x} cy={p.y} r={r+5} fill="none" stroke={col} strokeWidth={1.5} opacity={.4}/>}
+      <circle cx={p.x} cy={p.y} r={r+1.5} fill="white"/><circle cx={p.x} cy={p.y} r={r} fill={col}/>
+      <circle cx={p.x} cy={p.y} r={r+3} fill="none" stroke={costCol} strokeWidth={1.5} opacity={.5} strokeDasharray="2 1"/>
+      <text x={p.x} y={p.y+.5} textAnchor="middle" dominantBaseline="central" fill="white" fontSize={r>7?8:6.5} fontWeight={700} style={{userSelect:"none"}}>{i+1}</text>
+      <text x={p.x} y={p.y-r-3.5} textAnchor="middle" fill="#1a1a2e" fontSize={7} fontWeight={700} style={{userSelect:"none",paintOrder:"stroke",stroke:"#e6ebe0",strokeWidth:2}}>{c.n}{c.ap?" ✈":""}</text>
+      {cTime[i]!=null&&<text x={p.x} y={p.y+r+9} textAnchor="middle" fill="#1b7d3a" fontSize={6.5} fontWeight={700} style={{userSelect:"none",paintOrder:"stroke",stroke:"#e6ebe0",strokeWidth:2}}>⏱{cTime[i]}t</text>}
+    </g>;})}
+</svg>;}
+/* ═══ APP ═══ */
+const EMPTY={n:"Ny tur",s:"",e:"",stops:[],mode:"smartest",sd:"2026-07-05",mt:15};
+function App(){
+  const[trips,setTrips]=useState([{...EMPTY,n:"Mi reise"}]);const[ti,setTi]=useState(0);
+  const[_init]=useState(()=>{setTimeout(()=>{(()=>{try{const r=localStorage.getItem("ir-trips");if(r){const d=JSON.parse(r);if(Array.isArray(d)&&d.length)setTrips(d);}}catch(e){}})();},0);return 1;});
+  const trip=trips[ti]||EMPTY;const upd=fn=>{setTrips(p=>{const n=[...p];n[ti]={...n[ti],...fn(n[ti])};try{try{localStorage.setItem("ir-trips",JSON.stringify(n))}catch(e){};}catch(e){}return n;});};
+  const stops=useMemo(()=>(trip.stops||[]).map(s=>typeof s==="string"?{id:s,days:1,tn:"",pl:"",sd:0}:s),[trip.stops]);
+  const setSt=ns=>upd(()=>({stops:ns}));
+  const sC=trip.s,eC=trip.e,mode=trip.mode,sd=trip.sd,mt=trip.mt||15;
+  const[tab,setTab]=useState("route");const[selC,setSelC]=useState(null);const[zoom,setZoom]=useState(0);
+  const[showA,setShowA]=useState(false);const[aF,setAF]=useState([]);const[sA,setSA]=useState(null);const[selLeg,setSelLeg]=useState(null);
+
+  const route=useMemo(()=>{
+    if(!sC||!eC)return[];
+    let ids=[sC,...stops.map(s=>s.id),eC];ids=[...new Set(ids)];
+    if(mode==="manual"){let r=[];if(!stops.find(s=>s.id===sC))r.push(sC);stops.forEach(s=>r.push(s.id));if(!stops.find(s=>s.id===eC))r.push(eC);return r;}
+    return optimizeRoute(ids,sC,eC);
+  },[stops,sC,eC,mode]);
+
+  const{dayMap,clockMap,totalDays,cTime}=useMemo(()=>{
+    const dm=[];const cm=[];let day=0;let clock=9;let prevDay=0;
+    // Build a map: for each city in route, find its stop and check sd flag
+    for(let i=0;i<route.length;i++){
+      const id=route[i];
+      // Check if PREVIOUS route city had sd=1 (same day as next)
+      const prevId=i>0?route[i-1]:null;
+      const prevStop=prevId?stops.find(s=>s.id===prevId):null;
+      const sameAsPrev=prevStop?.sd===1;
+      if(i===0||!sameAsPrev)day++;
+      dm.push(day);
+      if(day!==prevDay){clock=9;prevDay=day;}
+      const cn=i>0?getConn(route[i-1],id):null;
+      if(cn&&sameAsPrev)clock+=cn.h;
+      const depCn=i<route.length-1?getConn(id,route[i+1]):null;
+      cm.push({arr:clock,dep:depCn?.t===2?21:20,free:0,day});
+    }
+    for(let i=0;i<cm.length;i++){
+      const nextSD=i<dm.length-1&&dm[i+1]===dm[i];
+      const depCn=i<route.length-1?getConn(route[i],route[i+1]):null;
+      if(nextSD){cm[i].dep=cm[i].arr+(depCn?.h||1)+1;}
+      else{cm[i].dep=depCn?.t===2?21:20;}
+      cm[i].free=Math.max(1,Math.round(cm[i].dep-cm[i].arr-(nextSD?(depCn?.h||0):0)));
+    }
+    return{dayMap:dm,clockMap:cm,totalDays:dm.length>0?dm[dm.length-1]:0,cTime:cm.map(c=>c.free)};
+  },[route,stops]);
+  const rc=route.map(id=>C.find(c=>c.id===id)).filter(Boolean);
+  const tT=(()=>{let t=0;for(let i=0;i<route.length-1;i++){const cn=getConn(route[i],route[i+1]);if(cn)t+=cn.h;else{const d=dijkstra(route[i],route[i+1]);t+=d.dist===Infinity?0:d.dist;}}return t;})();
+  const tC=rc.reduce((a,c)=>a+c.cost,0);const sc=C.find(c=>c.id===selC);
+  const byCC=useMemo(()=>{const m={};C.forEach(c=>{const k=c.f;if(!m[k])m[k]=[];m[k].push(c);});return Object.entries(m).sort((a,b)=>b[1].length-a[1].length);},[]);
+  const gd=day=>{const d=new Date(sd+"T12:00:00");d.setDate(d.getDate()+day-1);return`${DN[d.getDay()]} ${d.getDate()}.${MN[d.getMonth()]}`;};
+  const giso=day=>{const d=new Date(sd+"T12:00:00");d.setDate(d.getDate()+day-1);return d.toISOString().slice(0,10);};
+  const card={background:"white",borderRadius:10,border:"1px solid #d5d8d0",padding:"12px",marginBottom:8};
+  const toggle=id=>{const ex=stops.find(s=>s.id===id);if(ex)setSt(stops.filter(s=>s.id!==id));else setSt([...stops,{id,days:1,tn:"",pl:"",sd:0}]);};
+  const addC=id=>{if(!stops.find(s=>s.id===id))setSt([...stops,{id,days:1,tn:"",pl:"",sd:0}]);};
+  const mv=(i,d)=>{const n=[...stops];[n[i],n[i+d]]=[n[i+d],n[i]];setSt(n);};
+  const setDays=(i,d)=>{const n=[...stops];n[i]={...n[i],days:Math.max(1,Math.min(5,d))};setSt(n);};
+  const setF=(i,f,v)=>{const n=[...stops];n[i]={...n[i],[f]:v};setSt(n);};
+  const toggleSameDay=(i)=>{const n=[...stops];n[i]={...n[i],sd:n[i].sd?0:1};setSt(n);};
+
+  return <div style={{fontFamily:"'Segoe UI',system-ui,sans-serif",background:"#eef0e8",minHeight:"100vh",color:"#1a1a2e"}}>
+    <div style={{background:"#1a1a2e",color:"white",padding:"6px 14px",display:"flex",gap:4,alignItems:"center",flexWrap:"wrap"}}>
+      {trips.map((t,i)=><button key={i} onClick={()=>setTi(i)} style={{padding:"3px 10px",borderRadius:12,border:ti===i?"2px solid #c53d1b":"1px solid #555",background:ti===i?"#c53d1b":"transparent",color:"white",fontSize:10,fontWeight:ti===i?700:400,cursor:"pointer"}}>{t.n||"Tur "+(i+1)}</button>)}
+      <button onClick={()=>{setTrips(p=>[...p,{...EMPTY,n:"Tur "+(p.length+1)}]);setTi(trips.length);}} style={{padding:"3px 8px",borderRadius:12,border:"1px dashed #666",background:"transparent",color:"#888",fontSize:10,cursor:"pointer"}}>+</button>
+      {trips.length>1&&<button onClick={()=>{setTrips(p=>p.filter((_,i)=>i!==ti));setTi(Math.max(0,ti-1));}} style={{padding:"3px 6px",borderRadius:12,border:"1px solid #633",background:"transparent",color:"#c66",fontSize:9,cursor:"pointer"}}>🗑</button>}
+      <input value={trip.n} onChange={e=>upd(()=>({n:e.target.value}))} style={{marginLeft:"auto",background:"transparent",border:"1px solid #555",borderRadius:6,color:"white",padding:"2px 8px",fontSize:10,width:90}}/>
+    </div>
+    <div style={{background:"#1a1a2e",color:"white",padding:"4px 14px 8px",borderBottom:"3px solid #c53d1b",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+      <div><div style={{fontSize:15,fontWeight:700}}>🚂 Interrail Planleggar v8</div><div style={{fontSize:9,opacity:.5}}>{C.length} byar · {ATT.length} severdigheter</div></div>
+      <div style={{textAlign:"right"}}>{route.length>1?<><div style={{fontSize:20,fontWeight:800,color:"#c53d1b"}}>{fmt(tC)}</div><div style={{fontSize:9,opacity:.5}}>{route.length} stopp · {tT.toFixed(1)}t</div></>:<div style={{fontSize:10,opacity:.5}}>Vel start+slutt ⚡</div>}</div>
+    </div>
+    <div style={{display:"flex",background:"white",borderBottom:"1px solid #ddd"}}>
+      {[["map","🗺️"],["cities","🏙️"],["route","⚡"],["scenic","🏔️"],["hotels","🏨"],["budget","💰"]].map(([k,l])=>
+        <button key={k} onClick={()=>setTab(k)} style={{flex:1,padding:"9px",border:"none",fontSize:14,fontWeight:tab===k?700:400,background:tab===k?"white":"#f5f5f0",cursor:"pointer",borderBottom:tab===k?"3px solid #c53d1b":"3px solid transparent"}}>{l}</button>)}</div>
+    <div style={{maxWidth:700,margin:"0 auto",padding:"10px 12px"}}>
+
+    {tab==="map"&&<>
+      <div style={{display:"flex",gap:4,marginBottom:6,alignItems:"center"}}>
+        {["+","−","⟲"].map((l,i)=><button key={l} onClick={()=>i===0?setZoom(z=>Math.min(z+1,5)):i===1?setZoom(z=>Math.max(z-1,-2)):setZoom(0)} style={{padding:"4px 10px",border:"1px solid #bbb",borderRadius:5,background:"white",cursor:"pointer",fontWeight:700,fontSize:13}}>{l}</button>)}
+        <div style={{flex:1}}/><button onClick={()=>{setShowA(!showA);setSA(null);}} style={{padding:"5px 12px",border:`2px solid ${showA?"#c53d1b":"#bbb"}`,borderRadius:6,fontSize:11,fontWeight:700,cursor:"pointer",background:showA?"#fdf0ec":"white",color:showA?"#c53d1b":"#555"}}>{showA?"🏛️ Skjul severdigheter":"🏛️ Severdigheter"}</button>
+      </div>
+      {showA&&<div style={{display:"flex",gap:3,marginBottom:6,flexWrap:"wrap"}}>{ATYPES.map(t=>{const on=!aF.length||aF.includes(t.k);return <button key={t.k} onClick={()=>setAF(p=>p.includes(t.k)?p.filter(x=>x!==t.k):[...p,t.k])} style={{padding:"2px 7px",borderRadius:10,fontSize:9,fontWeight:600,cursor:"pointer",border:`1px solid ${on?t.c:"#ccc"}`,background:on?t.c+"15":"#f5f5f0",color:on?t.c:"#aaa"}}>{t.l}</button>;})}</div>}
+      <div style={{...card,padding:0,overflow:"hidden"}}><Map rc={rc} selId={selC} onSel={id=>{setSelC(selC===id?null:id);setSA(null);setSelLeg(null);}} zoom={zoom} sC={sC} eC={eC} showA={showA} aF={aF} sA={sA} onSA={a=>{setSA(sA?.id===a.id?null:a);setSelC(null);}} cTime={cTime} onAdd={addC} onLine={i=>setSelLeg(selLeg===i?null:i)} selLeg={selLeg}/></div>
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:6,fontSize:9,color:"#888"}}>
+        {[[TCOL[1],"━ Høgfart"],[TCOL[0],"━ Vanleg"],[TCOL[2],"┅ Nattog"],[TCOL[4],"┅ Scenic"],[TCOL[3],"━ HST+res"]].map(([c,l])=><span key={l} style={{color:c,fontWeight:600}}>{l}</span>)}
+        <span style={{color:"#16a34a"}}>◯ billeg</span><span style={{color:"#d97706"}}>◯ middels</span><span style={{color:"#dc2626"}}>◯ dyrt</span></div>
+      {selLeg!=null&&rc[selLeg]&&rc[selLeg+1]&&(()=>{const f=rc[selLeg],t=rc[selLeg+1];const cn=getConn(f.id,t.id);const cl=clockMap[selLeg];const dep=cl?.dep||9;const arr=dep+(cn?.h||0);const st=stops.find(s=>s.id===f.id);const sameD=dayMap[selLeg]===dayMap[selLeg+1];
+        return <div style={{...card,borderLeft:`4px solid ${TCOL[cn?.t||0]}`}}>
+          <div style={{fontSize:13,fontWeight:700}}>{f.f}{f.n} → {t.f}{t.n}</div>
+          <div style={{fontSize:11,marginTop:4,lineHeight:1.8}}>
+            🚄 {TNAME[cn?.t||0]} · {cn?.h||"?"}t<br/>
+            🕐 ~{Math.floor(dep)}:{String(Math.round(dep%1*60)).padStart(2,"0")} → ~{Math.floor(arr)}:{String(Math.round(arr%1*60)).padStart(2,"0")}<br/>
+            📅 Dag {dayMap[selLeg]} — {gd(dayMap[selLeg])}{sameD?" ☀️ Same dag":""}{cn?.t===2?" · 🌙 Nattog!":""}{cn?.t>=3?" · ® Res!":""}<br/>
+            ⏱️ Min. byttetid: {mt} min<br/>
+            {st?.tn?`🎫 Tog: ${st.tn}`:"🎫 Skriv inn tognr i ⚡"}<br/>
+            {st?.pl?`🚉 Plattform: ${st.pl}`:"🚉 Skriv inn i ⚡"}
+          </div>
+        </div>;})()}
+      {sA&&<div style={{...card,borderLeft:`4px solid ${ATYPES.find(t=>t.k===sA.ty)?.c}`}}><b>{sA.n}</b> · {sA.ci} · {sA.d}</div>}
+      {sc&&!sA&&selLeg==null&&<div style={card}><b>{sc.f} {sc.n}</b> {sc.ap?`✈${sc.ap}`:""} · {sc.no} · {fmt(sc.cost)}/dag · ⭐{sc.sc}
+        {(()=>{const ca=ATT.filter(a=>a.ci===sc.n);return ca.length?<div style={{marginTop:6,borderTop:"1px solid #eee",paddingTop:4}}>
+          {ca.map(a=><div key={a.id} style={{fontSize:10,padding:"1px 0",cursor:"pointer"}} onClick={()=>setSA(a)}>• <b>{a.n}</b> ({ATYPES.find(t=>t.k===a.ty)?.l}) — {a.d}</div>)}
+        </div>:null;})()}
+      </div>}
+      <button onClick={()=>dlGPX(route)} style={{width:"100%",padding:"10px",background:"#1a1a2e",color:"white",border:"none",borderRadius:8,fontSize:12,fontWeight:700,cursor:"pointer"}}>📥 GPX</button>
+    </>}
+
+    {tab==="cities"&&<>
+      <input value={typeof window!=="undefined"&&window._citySearch||""} onChange={e=>{window._citySearch=e.target.value;setSelC(e.target.value);}} placeholder="🔍 Søk by..." style={{width:"100%",padding:"8px 12px",border:"1px solid #ddd",borderRadius:8,fontSize:12,marginBottom:8}}/>
+      {byCC.map(([fl,cs])=>{const fcs=selC&&selC.length>1?cs.filter(c=>c.n.toLowerCase().includes((window._citySearch||"").toLowerCase())):cs;if(!fcs.length)return null;return <div key={fl} style={card}>
+      <div style={{fontSize:12,fontWeight:700,marginBottom:5}}>{fl} ({fcs.filter(c=>stops.find(s=>s.id===c.id)).length}/{fcs.length})</div>
+      <div style={{display:"flex",flexWrap:"wrap",gap:3}}>{fcs.map(c=>{const on=stops.find(s=>s.id===c.id);return <button key={c.id} onClick={()=>toggle(c.id)} style={{padding:"3px 8px",borderRadius:12,fontSize:10,fontWeight:600,cursor:"pointer",border:`1px solid ${on?"#c53d1b":"#ccc"}`,background:on?"#fdf0ec":"white",color:on?"#c53d1b":"#666"}}>{c.n}{c.ap?" ✈":""}{on?" ✓":""}</button>;})}</div>
+    </div>;})}</>}
+
+    {tab==="route"&&<>
+      {route.length>1&&<div style={card}>
+        <div style={{fontSize:11,fontWeight:700,marginBottom:6}}>📊 Dagleg oversikt</div>
+        <div style={{display:"flex",flexDirection:"column",gap:3}}>
+          {Array.from({length:totalDays},(_, di)=>{
+            const dayNum=di+1;const dayStops=route.map((id,i)=>({id,i,c:C.find(x=>x.id===id)})).filter((_,i)=>dayMap[i]===dayNum);
+            const dayDate=new Date(sd+"T12:00:00");dayDate.setDate(dayDate.getDate()+di);const we=dayDate.getDay()===0||dayDate.getDay()===6;
+            let travelH=0;dayStops.forEach(({i})=>{if(i>0&&dayMap[i]===dayMap[i-1]){const cn=getConn(route[i-1],route[i]);if(cn)travelH+=cn.h;}});
+            const freeH=dayStops.reduce((a,{i})=>a+(cTime[i]||0),0);
+            const totalH=Math.min(14,travelH+freeH);const tPct=totalH>0?travelH/totalH*100:0;const fPct=totalH>0?freeH/totalH*100:0;
+            return <div key={dayNum} style={{display:"flex",alignItems:"center",gap:4}}>
+              <span style={{fontSize:9,fontWeight:700,color:we?"#c53d1b":"#555",width:55,flexShrink:0}}>Dag {dayNum} {DN[dayDate.getDay()]}</span>
+              <div style={{flex:1,height:16,borderRadius:4,overflow:"hidden",display:"flex",background:"#f0f0ea"}}>
+                {travelH>0&&<div style={{width:tPct+"%",background:"#c53d1b",display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{fontSize:7,color:"white",fontWeight:700}}>{travelH.toFixed(1)}t</span></div>}
+                <div style={{width:fPct+"%",background:"#16a34a",display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{fontSize:7,color:"white",fontWeight:700}}>{freeH}t</span></div>
+              </div>
+              <span style={{fontSize:8,color:"#888",width:70,textAlign:"right",flexShrink:0}}>{dayStops.map(s=>s.c?.f).join("")}</span>
+            </div>;
+          })}
+        </div>
+        <div style={{display:"flex",gap:8,marginTop:4,fontSize:8,color:"#888"}}>
+          <span><span style={{display:"inline-block",width:8,height:8,borderRadius:2,background:"#c53d1b",marginRight:2}}/>Tog</span>
+          <span><span style={{display:"inline-block",width:8,height:8,borderRadius:2,background:"#16a34a",marginRight:2}}/>Fri</span>
+        </div>
+      </div>}
+      <div style={card}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:8}}>
+          <div><label style={{fontSize:10,fontWeight:600,color:"#888"}}>Start:</label>
+            <select value={sC} onChange={e=>{upd(t=>{const ns=[...t.stops||[]];if(e.target.value&&!ns.find(s=>s.id===e.target.value))ns.unshift({id:e.target.value,days:1,tn:"",pl:""});return{s:e.target.value,stops:ns};});}} style={{width:"100%",padding:"6px",border:"1px solid #ddd",borderRadius:6,fontSize:11}}>
+              <option value="">—</option>{C.map(c=><option key={c.id} value={c.id}>{c.f}{c.n}{c.ap?" ✈":""}</option>)}</select></div>
+          <div><label style={{fontSize:10,fontWeight:600,color:"#888"}}>Slutt:</label>
+            <select value={eC} onChange={e=>{upd(t=>{const ns=[...t.stops||[]];if(e.target.value&&!ns.find(s=>s.id===e.target.value))ns.push({id:e.target.value,days:1,tn:"",pl:""});return{e:e.target.value,stops:ns};});}} style={{width:"100%",padding:"6px",border:"1px solid #ddd",borderRadius:6,fontSize:11}}>
+              <option value="">—</option>{C.map(c=><option key={c.id} value={c.id}>{c.f}{c.n}{c.ap?" ✈":""}</option>)}</select></div>
+        </div>
+        <div style={{fontSize:10,color:"#888",padding:"4px 8px",background:"#f5f5f0",borderRadius:6,marginBottom:6}}>
+          ✈️ {sC?`${C.find(c=>c.id===sC)?.n}: ~€${FLY[sC]||"??"}`:"—"} → {eC?`${C.find(c=>c.id===eC)?.n}: ~€${FLY[eC]||"??"}`:"—"}
+        </div>
+        <div style={{display:"flex",gap:3,marginBottom:6}}>{[["smartest","🧠 Smart"],["manual","✋ Manuell"]].map(([m,l])=><button key={m} onClick={()=>upd(()=>({mode:m}))} style={{flex:1,padding:"7px",borderRadius:8,fontSize:11,fontWeight:700,cursor:"pointer",border:`2px solid ${mode===m?"#c53d1b":"#ddd"}`,background:mode===m?"#fdf0ec":"white",color:mode===m?"#c53d1b":"#666"}}>{l}</button>)}</div>
+        <div style={{display:"flex",gap:6,alignItems:"center"}}>
+          <input type="date" value={sd} onChange={e=>upd(()=>({sd:e.target.value}))} style={{flex:1,padding:"5px",border:"1px solid #ddd",borderRadius:6,fontSize:11}} min="2026-04-01"/>
+          <label style={{fontSize:9,color:"#888"}}>Bytte:</label>
+          <select value={mt} onChange={e=>upd(()=>({mt:+e.target.value}))} style={{padding:"5px",border:"1px solid #ddd",borderRadius:6,fontSize:11}}>
+            {[10,15,20,30,45,60].map(m=><option key={m} value={m}>{m}min</option>)}</select>
+        </div>
+      </div>
+      <div style={card}>
+        <div style={{fontSize:12,fontWeight:700,marginBottom:5}}>Rute ({route.length} stopp · {totalDays} dagar · {tT.toFixed(1)}t · {fmt(tC)})</div>
+        {route.length>1&&(()=>{const warns=[];for(let i=0;i<route.length-1;i++){if(!getConn(route[i],route[i+1])){const f=C.find(x=>x.id===route[i]),t=C.find(x=>x.id===route[i+1]);warns.push(`${f?.n}→${t?.n}: ingen direkte tog!`);}}
+          return warns.length?<div style={{fontSize:10,color:"#c53d1b",padding:"6px 8px",background:"#fef2ee",borderRadius:6,marginBottom:6,border:"1px solid #f5c6b8"}}>⚠️ {warns.join(" · ")} Legg til mellombyar.</div>:null;})()}
+        {route.length<2&&<div style={{color:"#aaa",fontSize:11,padding:12,textAlign:"center"}}>Vel start+slutt ovanfor</div>}
+        {route.map((id,i)=>{const c=C.find(x=>x.id===id);if(!c)return null;const cn=i<route.length-1?getConn(id,route[i+1]):null;
+          const day=dayMap[i];const clk=clockMap[i];const we=new Date(new Date(sd+"T12:00:00").setDate(new Date(sd+"T12:00:00").getDate()+day-1)).getDay();const isWe=we===0||we===6;
+          const si=stops.findIndex(s=>s.id===id);const st=si>=0?stops[si]:null;
+          const showDayHeader=i===0||dayMap[i]!==dayMap[i-1];
+          // Day travel warning
+          const dayStops=route.filter((_,j)=>dayMap[j]===day);
+          const dayTravel=dayStops.reduce((a,did,j)=>{const ji=route.indexOf(did);if(ji>0&&dayMap[ji]===dayMap[ji-1]){const cc=getConn(route[ji-1],did);return a+(cc?.h||0);}return a;},0);
+          const sides=ADJ[id]?Object.entries(ADJ[id]).filter(([n,v])=>!stops.find(s=>s.id===n)&&v.h<=2.5).map(([n,v])=>{const nc=C.find(x=>x.id===n);return nc?{id:n,n:nc.n,f:nc.f,h:v.h,sc:nc.sc}:null;}).filter(Boolean).sort((a,b)=>b.sc-a.sc).slice(0,3):[];
+          return <div key={id+i}>
+            {showDayHeader&&<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0 2px",marginTop:i>0?6:0,borderTop:i>0?"2px solid #e8e8e0":"none"}}>
+              <span style={{fontSize:11,fontWeight:700,color:isWe?"#c53d1b":"#1a1a2e"}}>📅 Dag {day} — {gd(day)}</span>
+              {dayTravel>6&&<span style={{fontSize:9,color:"#c53d1b",fontWeight:600}}>⚠️ {dayTravel.toFixed(1)}t reise!</span>}
+              {dayStops.length>1&&<span style={{fontSize:9,color:"#059669"}}>{dayStops.length} byar</span>}
+            </div>}
+            <div style={{display:"flex",alignItems:"center",gap:5,padding:"3px 0"}}>
+              <div style={{width:18,height:18,borderRadius:"50%",background:id===sC?COL.s:id===eC?COL.e:COL.m,color:"white",display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,fontWeight:700,flexShrink:0}}>{i+1}</div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:12,fontWeight:600}}>{c.f} {c.n} {c.ap?"✈":""}</div>
+                <div style={{fontSize:9,color:"#888"}}>{c.no} · 🕐{Math.floor(clk.arr)}:{String(Math.round(clk.arr%1*60)).padStart(2,"0")}–{Math.floor(clk.dep)}:{String(Math.round(clk.dep%1*60)).padStart(2,"0")} · ⏱{clk.free}t fri</div>
+              </div>
+              {mode==="manual"&&si>=0&&<div style={{display:"flex",gap:2}}>
+                {si>0&&<button onClick={()=>mv(si,-1)} style={{width:20,height:20,border:"1px solid #ddd",borderRadius:4,background:"white",cursor:"pointer",fontSize:10}}>↑</button>}
+                {si<stops.length-1&&<button onClick={()=>mv(si,1)} style={{width:20,height:20,border:"1px solid #ddd",borderRadius:4,background:"white",cursor:"pointer",fontSize:10}}>↓</button>}
+              </div>}
+            </div>
+            {si>=0&&<div style={{padding:"2px 0 2px 26px",display:"flex",gap:3,alignItems:"center",flexWrap:"wrap"}}>
+              <div style={{display:"flex",alignItems:"center",border:"1px solid #ddd",borderRadius:6,overflow:"hidden"}}>
+                <button onClick={()=>setDays(si,(st?.days||1)-1)} style={{width:22,height:22,border:"none",background:st?.days>1?"#f5f5f0":"#eee",cursor:st?.days>1?"pointer":"default",fontSize:12,color:st?.days>1?"#333":"#ccc"}}>−</button>
+                <span style={{fontSize:10,fontWeight:700,padding:"0 4px"}}>{st?.days||1}d</span>
+                <button onClick={()=>setDays(si,(st?.days||1)+1)} style={{width:22,height:22,border:"none",background:"#f5f5f0",cursor:"pointer",fontSize:12}}>+</button>
+              </div>
+              <input value={st?.tn||""} onChange={e=>setF(si,"tn",e.target.value)} placeholder="Tog" style={{width:45,padding:"2px 4px",border:"1px solid #eee",borderRadius:4,fontSize:9}}/>
+              <input value={st?.pl||""} onChange={e=>setF(si,"pl",e.target.value)} placeholder="Plf" style={{width:35,padding:"2px 4px",border:"1px solid #eee",borderRadius:4,fontSize:9}}/>
+              {i<route.length-1&&cn&&<button onClick={()=>toggleSameDay(si)} style={{fontSize:9,padding:"3px 8px",borderRadius:6,border:`2px solid ${st?.sd?"#059669":"#ccc"}`,background:st?.sd?"#d1fae5":"#f9f9f6",color:st?.sd?"#047857":"#888",cursor:"pointer",fontWeight:700}}>{st?.sd?"☀️ Same dag":"☀️ +same dag"}</button>}
+              <button onClick={()=>setSt([...stops,{id,days:1,tn:"",pl:"",sd:0}])} style={{fontSize:9,padding:"3px 6px",borderRadius:6,border:"1px solid #ddd",background:"white",color:"#666",cursor:"pointer"}}>🔄</button>
+              {id!==sC&&id!==eC&&<button onClick={()=>setSt(stops.filter(s=>s.id!==id))} style={{fontSize:9,padding:"3px 6px",borderRadius:6,border:"1px solid #e88",background:"white",color:"#c44",cursor:"pointer"}}>✕</button>}
+            </div>}
+            {sides.length>0&&<div style={{padding:"1px 0 1px 26px",display:"flex",gap:3,flexWrap:"wrap"}}>
+              {sides.map(s=><button key={s.id} onClick={()=>addC(s.id)} style={{fontSize:8,padding:"2px 6px",borderRadius:8,border:"1px dashed #aaa",background:"#fafaf8",color:"#666",cursor:"pointer"}}>💡{s.f}{s.n} ({s.h}t)+</button>)}</div>}
+            {cn&&(i<route.length-1&&dayMap[i+1]!==day?<div style={{padding:"1px 0 1px 26px",fontSize:9,color:TCOL[cn.t],fontWeight:cn.t>0?600:400}}>🌅 ↓ {cn.h}t {TNAME[cn.t]} {mt>15?`· bytte≥${mt}m`:""}</div>:
+              dayMap[i+1]===day?<div style={{padding:"1px 0 1px 26px",fontSize:9,color:"#059669",fontWeight:600}}>☀️ ↓ {cn.h}t same dag</div>:null)}
+          </div>;})}
+      </div>
+    </>}
+
+    {tab==="scenic"&&<>{SCENIC.map(r=>{const allIn=r.c.every(id=>stops.find(s=>s.id===id));return <div key={r.id} style={{...card,borderLeft:`4px solid ${r.cl}`}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div style={{flex:1}}><div style={{fontSize:13,fontWeight:700}}>{r.n}</div><div style={{fontSize:10,color:"#888"}}>{r.d}</div>
+            <div style={{display:"flex",gap:3,marginTop:4,flexWrap:"wrap"}}>{r.c.map(id=>{const ci=C.find(c=>c.id===id);return ci?<span key={id} style={{fontSize:9,padding:"2px 6px",borderRadius:8,background:stops.find(s=>s.id===id)?"#e8f5e9":"#f5f5f0",color:stops.find(s=>s.id===id)?"#2e7d32":"#888",fontWeight:600}}>{ci.f}{ci.n}</span>:null;})}</div>
+          </div>
+          <button onClick={()=>{const ns=[...stops];r.c.forEach(id=>{if(!ns.find(s=>s.id===id))ns.push({id,days:1,tn:"",pl:""});});setSt(ns);if(!sC)upd(()=>({s:r.c[0]}));if(!eC)upd(()=>({e:r.c[r.c.length-1]}));}} style={{padding:"8px 12px",background:allIn?"#22863a":r.cl,color:"white",border:"none",borderRadius:8,fontSize:10,fontWeight:700,cursor:"pointer",flexShrink:0}}>{allIn?"✓":"+"}</button>
+        </div></div>;})}
+    </>}
+
+    {tab==="hotels"&&<>
+      {route.length<2?<div style={{...card,color:"#aaa",textAlign:"center"}}>Vel start/slutt i ⚡</div>:
+      rc.map((c,i)=>{const day=dayMap[i];const ciD=giso(day);const coD=giso(day+1);
+        const ca=ATT.filter(a=>a.ci===c.n&&a.ty==="food");
+        return <div key={c.id+i} style={card}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div><div style={{fontSize:13,fontWeight:700}}>{c.f} {c.n} {c.ap?`✈${c.ap}`:""}</div>
+              <div style={{fontSize:10,color:"#888"}}>{c.no} · Dag {day} · {gd(day)}</div></div>
+            <span style={{fontSize:9,color:"#888",background:"#f5f5f0",padding:"2px 8px",borderRadius:8}}>📅 {gd(day)}</span>
+          </div>
+          <a href={bookUrl(c.n,ciD,coD)} target="_blank" rel="noopener" style={{display:"block",textAlign:"center",fontSize:11,fontWeight:700,background:"#003580",color:"white",padding:"8px",borderRadius:6,marginTop:6,textDecoration:"none"}}>🏨 Hotell i {c.n} — {ciD.slice(5)} →</a>
+          {ca.length>0&&<div style={{marginTop:6,borderTop:"1px solid #eee",paddingTop:4}}>
+            <div style={{fontSize:9,fontWeight:700,color:"#d97706",marginBottom:2}}>🍽️ Anbefalte restaurantar:</div>
+            {ca.map(a=><div key={a.id} style={{fontSize:10,padding:"1px 0"}}>• <b>{a.n}</b> — {a.d}</div>)}
+          </div>}
+        </div>;
+      })}
+    </>}
+
+    {tab==="budget"&&<>{(()=>{
+      if(route.length<2)return <div style={{...card,color:"#aaa",textAlign:"center"}}>Vel start/slutt i ⚡</div>;
+      // Stats
+      const countries=[...new Set(rc.map(c=>c.f))];
+      const totalKm=(()=>{let km=0;for(let i=0;i<route.length-1;i++){const cn=getConn(route[i],route[i+1]);if(cn)km+=cn.h*80;}return Math.round(km);})(); // ~80km/h avg
+      const hstLegs=[];const nightLegs=[];const scenicLegs=[];
+      for(let i=0;i<route.length-1;i++){const cn=getConn(route[i],route[i+1]);if(!cn)continue;if(cn.t===1||cn.t===3)hstLegs.push(i);if(cn.t===2)nightLegs.push(i);if(cn.t===4)scenicLegs.push(i);}
+      const longestLeg=(()=>{let mx=0,mi=-1;for(let i=0;i<route.length-1;i++){const cn=getConn(route[i],route[i+1]);if(cn&&cn.h>mx){mx=cn.h;mi=i;}}return mi>=0?{h:mx,f:C.find(x=>x.id===route[mi])?.n,t:C.find(x=>x.id===route[mi+1])?.n}:null;})();
+      const cheapest=rc.filter(c=>c.cost>0).sort((a,b)=>a.cost-b.cost)[0];
+      const mostExp=rc.filter(c=>c.cost>0).sort((a,b)=>b.cost-a.cost)[0];
+      const n=route.length;const ntc=nightLegs.length;
+      const hn=Math.max(0,n-1-ntc);const ah=rc.length?Math.round(rc.reduce((a,c)=>a+c.cost,0)/rc.length*.55):60;
+      const ht=hn*ah;const fd=n*25;const mu=rc.reduce((a,c)=>a+Math.min(c.cost*.15,20),0);
+      const ft=(FLY[sC]||120)+(FLY[eC]||120);
+      const rs=(()=>{let t=0;for(let i=0;i<n-1;i++){const cn=getConn(route[i],route[i+1]);if(!cn)continue;if(cn.t===2)t+=25;else if(cn.t===3)t+=15;else if(cn.t===4)t+=20;}return t;})();
+      const td=n-1;const ps=[{n:"4d/1m",d:4,p:246},{n:"5d/1m",d:5,p:276},{n:"7d/1m",d:7,p:296},{n:"10d/2m",d:10,p:356},{n:"15d/2m",d:15,p:416},{n:"1m",d:30,p:496},{n:"3m",d:90,p:676}];
+      const bp=ps.find(p=>p.d>=td)||ps[ps.length-1];const tot=ht+fd+ft+bp.p+rs+Math.round(mu);
+      return <><div style={card}><div style={{fontSize:14,fontWeight:700,marginBottom:8}}>💰 Total</div>
+        <div style={{fontSize:11,lineHeight:2}}>
+          {[["✈️ Fly",ft],["🎫 Pass ("+bp.n+")",bp.p],["🏨 Hotell ("+hn+"n)",ht],["🍽️ Mat ("+n+"d)",fd],["🎟️ Res.",rs],["🏛️ Museum",Math.round(mu)]].map(([l,v])=>
+            <div key={l} style={{display:"flex",justifyContent:"space-between"}}><span>{l}</span><b>{fmt(v)}</b></div>)}
+          <div style={{display:"flex",justifyContent:"space-between",borderTop:"2px solid #c53d1b",paddingTop:6,marginTop:4,fontSize:16,fontWeight:800,color:COL.m}}><span>TOTALT</span><span>{fmt(tot)}</span></div>
+        </div>{ntc>0&&<div style={{fontSize:10,color:"#059669",marginTop:4}}>🌙 {ntc} nattog = ~{fmt(ntc*ah)} spart!</div>}</div>
+      <div style={card}><div style={{fontSize:13,fontWeight:700,marginBottom:6}}>🎫 Pass ({td} reisedagar)</div>
+        {ps.map(p=>{const r=p===bp;return <div key={p.n} style={{display:"flex",justifyContent:"space-between",padding:"4px 8px",marginBottom:2,borderRadius:6,background:r?"#fdf0ec":"#fafafa",border:r?"2px solid #c53d1b":"1px solid #eee"}}>
+          <span style={{fontSize:11,fontWeight:r?700:400}}>{p.n}{r?" ←":""}</span><b>{fmt(p.p)}</b></div>;})}</div>
+      <div style={card}><div style={{fontSize:13,fontWeight:700,marginBottom:6}}>📊 Reisestatistikk</div>
+        <div style={{fontSize:11,lineHeight:2}}>
+          <div style={{display:"flex",justifyContent:"space-between"}}><span>🌍 Land</span><b>{countries.length} ({countries.join(" ")})</b></div>
+          <div style={{display:"flex",justifyContent:"space-between"}}><span>🏙️ Byar</span><b>{rc.length}</b></div>
+          <div style={{display:"flex",justifyContent:"space-between"}}><span>📏 Estimert distanse</span><b>~{totalKm.toLocaleString()} km</b></div>
+          <div style={{display:"flex",justifyContent:"space-between"}}><span>🚄 Høgfartstog</span><b>{hstLegs.length} strekningar</b></div>
+          <div style={{display:"flex",justifyContent:"space-between"}}><span>🌙 Nattog</span><b>{nightLegs.length}</b></div>
+          <div style={{display:"flex",justifyContent:"space-between"}}><span>🏔️ Scenic</span><b>{scenicLegs.length}</b></div>
+          {longestLeg&&<div style={{display:"flex",justifyContent:"space-between"}}><span>🐌 Lengste strekning</span><b>{longestLeg.f}→{longestLeg.t} ({longestLeg.h}t)</b></div>}
+          {cheapest&&<div style={{display:"flex",justifyContent:"space-between"}}><span>💚 Billegaste by</span><b>{cheapest.f}{cheapest.n} ({fmt(cheapest.cost)}/d)</b></div>}
+          {mostExp&&<div style={{display:"flex",justifyContent:"space-between"}}><span>💸 Dyraste by</span><b>{mostExp.f}{mostExp.n} ({fmt(mostExp.cost)}/d)</b></div>}
+        </div>
+      </div>
+      {(()=>{const BEN={"🇨🇭":{n:"Sveits",b:["50% rabatt på fjellbaner (Jungfrau, Pilatus, Rigi)","Gratis buss/trikk i mange byar","Gratisbåt på innsjøar (Luzern, Zürich, Genève)"]},"🇦🇹":{n:"Austerrike",b:["ÖBB Lounge tilgang i Wien Hbf","Gratis Innsbruck Card-rabatt","Nattog NightJet med Interrail (res. påkravd)"]},"🇩🇪":{n:"Tyskland",b:["ICE utan reservasjon (gratis!)","S-Bahn gratis i alle byar","Flixbus 10% rabatt"]},"🇮🇹":{n:"Italia",b:["Gratis museum fyrste søndag i månaden","Frecciarossa krev reservasjon (~€13)","Regionale tog utan reservasjon"]},"🇫🇷":{n:"Frankrike",b:["TGV krev reservasjon (~€20-30)","Gratis metro Paris m/RER","Ouigo IKKJE inkludert"]},"🇪🇸":{n:"Spania",b:["AVE krev reservasjon (~€10)","Renfe-tog inkludert","Cercanías (lokaltog) gratis"]},"🇨🇿":{n:"Tsjekkia",b:["Alle tog inkludert utan res.","SC Pendolino res. valfri (~€4)","RegioJet/Leo Express IKKJE inkl."]},"🇵🇱":{n:"Polen",b:["PKP Intercity inkludert","EIP Pendolino res. påkravd (~€7)","Billeg mat overalt!"]},"🇳🇱":{n:"Nederland",b:["Alle NS-tog inkludert","Thalys krev res.","Gratis ferje til øyar"]},"🇩🇰":{n:"Danmark",b:["DSB-tog inkludert","Øresund-tog til Malmö inkl.","Reservasjon valfri"]},"🇸🇪":{n:"Sverige",b:["SJ-tog inkludert (res. anbefalt)","Nattog til Hamburg/Berlin","Arlanda Express IKKJE inkl."]},"🇳🇴":{n:"Noreg",b:["Vy-tog inkludert","Flåmsbana 30% rabatt","Hurtigruten IKKJE inkl."]},"🇭🇺":{n:"Ungarn",b:["MÁV-tog inkludert","Reservasjon gratis!","Budapest-kortet separat"]},"🇸🇮":{n:"Slovenia",b:["SŽ-tog inkludert","Bled Express inkl.","Lake Bled-båt 20% rabatt"]},"🇭🇷":{n:"Kroatia",b:["HŽPP-tog inkludert","Kystlinja Split–Zagreb","Ferje til øyar rabatt"]},"🇵🇹":{n:"Portugal",b:["CP-tog inkludert","Alfa Pendular res. påkravd","Lisboa Trikk 28 IKKJE inkl."]},"🇬🇷":{n:"Hellas",b:["Hellenic Train inkludert","Avgrensa rutenett","Ferjer til øyar rabatt"]}};
+        const myCountries=countries.filter(f=>BEN[f]);
+        return myCountries.length?<div style={card}><div style={{fontSize:13,fontWeight:700,marginBottom:6}}>🎫 Interrail-fordelar per land</div>
+          {myCountries.map(f=><div key={f} style={{marginBottom:6}}>
+            <div style={{fontSize:11,fontWeight:700}}>{f} {BEN[f].n}</div>
+            {BEN[f].b.map((b,i)=><div key={i} style={{fontSize:10,color:"#555",paddingLeft:8}}>• {b}</div>)}
+          </div>)}
+        </div>:null;
+      })()}
+      </>;})()}</>}
+
+    </div>
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+  </script>
+</body>
+</html>
