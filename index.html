@@ -256,7 +256,8 @@ function dijkstra(fr, to) {
   };
 }
 function getConn(a, b) {
-  return ADJ[a][b] || null;
+  var _ADJ$a;
+  return ((_ADJ$a = ADJ[a]) === null || _ADJ$a === void 0 ? void 0 : _ADJ$a[b]) || null;
 }
 const geo = (a, b) => {
   const ca = C.find(x => x.id === a),
@@ -306,8 +307,8 @@ function optimizeRoute(ids, sId, eId) {
 function topoFeature(topo, obj) {
   const arcs = topo.arcs,
     tf = topo.transform,
-    sc = tf.scale || [1, 1],
-    tr = tf.translate || [0, 0];
+    sc = (tf === null || tf === void 0 ? void 0 : tf.scale) || [1, 1],
+    tr = (tf === null || tf === void 0 ? void 0 : tf.translate) || [0, 0];
   function dA(i) {
     const arc = arcs[i < 0 ? ~i : i],
       co = [];
@@ -406,8 +407,8 @@ function Map({
       ...a,
       x2: b.x,
       y2: b.y,
-      t: cn.h,
-      tp: cn.t || 0,
+      t: cn === null || cn === void 0 ? void 0 : cn.h,
+      tp: (cn === null || cn === void 0 ? void 0 : cn.t) || 0,
       i
     });
   }
@@ -486,7 +487,7 @@ function Map({
       y2: s.y2,
       stroke: col,
       strokeWidth: isSel ? 8 : 5,
-      strokeOpacity: isSel ? 0.3 : 0.12,
+      strokeOpacity: isSel ? .3 : .12,
       strokeLinecap: "round"
     }), /*#__PURE__*/React.createElement("line", {
       x1: s.x,
@@ -514,8 +515,9 @@ function Map({
   }), showA && (() => {
     const ns = new Set(rc.map(c => c.n));
     return ATT.filter(a => ns.has(a.ci) && (!aF.length || aF.includes(a.ty))).map(a => {
+      var _ATYPES$find;
       const p = pj(a.lat, a.lng);
-      const tc = ATYPES.find(t => t.k === a.ty).c || "#888";
+      const tc = ((_ATYPES$find = ATYPES.find(t => t.k === a.ty)) === null || _ATYPES$find === void 0 ? void 0 : _ATYPES$find.c) || "#888";
       return /*#__PURE__*/React.createElement("g", {
         key: a.id,
         onClick: e => {
@@ -525,7 +527,7 @@ function Map({
         style: {
           cursor: "pointer"
         }
-      }, sA.id === a.id && /*#__PURE__*/React.createElement("circle", {
+      }, (sA === null || sA === void 0 ? void 0 : sA.id) === a.id && /*#__PURE__*/React.createElement("circle", {
         cx: p.x,
         cy: p.y,
         r: 8,
@@ -630,6 +632,7 @@ const EMPTY = {
   mt: 15
 };
 function App() {
+  var _ATYPES$find2, _C$find, _C$find2;
   const [trips, setTrips] = useState([{
     ...EMPTY,
     n: "Mi reise"
@@ -637,14 +640,13 @@ function App() {
   const [ti, setTi] = useState(0);
   const [_init] = useState(() => {
     setTimeout(() => {
-      localStorage.getItem("ir-trips").then(r => {
-        if (r.value) {
-          try {
-            const d = JSON.parse(r.value);
-            if (Array.isArray(d) && d.length) setTrips(d);
-          } catch (e) {}
+      try {
+        const raw = localStorage.getItem("ir-trips");
+        if (raw) {
+          const d = JSON.parse(raw);
+          if (Array.isArray(d) && d.length) setTrips(d);
         }
-      }).catch(() => {});
+      } catch (e) {}
     }, 0);
     return 1;
   });
@@ -709,10 +711,11 @@ function App() {
     let clock = 9;
     let prevDay = 0;
     for (let i = 0; i < route.length; i++) {
+      var _stops$prev;
       const id = route[i];
       const si = stops.findIndex(s => s.id === id);
       const prev = i > 0 ? stops.findIndex(s => s.id === route[i - 1]) : null;
-      if (i === 0 || !(prev != null && stops[prev].sd)) day++;
+      if (i === 0 || !(prev != null && (_stops$prev = stops[prev]) !== null && _stops$prev !== void 0 && _stops$prev.sd)) day++;
       dm.push(day);
       if (day !== prevDay) {
         clock = 9;
@@ -721,7 +724,7 @@ function App() {
       const cn = i > 0 ? getConn(route[i - 1], id) : null;
       if (cn && dm[i] === dm[i - 1]) clock += cn.h;
       const depCn = i < route.length - 1 ? getConn(id, route[i + 1]) : null;
-      const isNight = depCn.t === 2;
+      const isNight = (depCn === null || depCn === void 0 ? void 0 : depCn.t) === 2;
       cm.push({
         arr: clock,
         dep: isNight ? 21 : 20,
@@ -733,11 +736,11 @@ function App() {
       const nextSD = i < dm.length - 1 && dm[i + 1] === dm[i];
       const depCn = i < route.length - 1 ? getConn(route[i], route[i + 1]) : null;
       if (nextSD) {
-        cm[i].dep = cm[i].arr + (depCn.h || 1) + 1;
+        cm[i].dep = cm[i].arr + ((depCn === null || depCn === void 0 ? void 0 : depCn.h) || 1) + 1;
       } else {
-        cm[i].dep = depCn.t === 2 ? 21 : 20;
+        cm[i].dep = (depCn === null || depCn === void 0 ? void 0 : depCn.t) === 2 ? 21 : 20;
       }
-      cm[i].free = Math.max(1, Math.round(cm[i].dep - cm[i].arr - (nextSD ? depCn.h || 0 : 0)));
+      cm[i].free = Math.max(1, Math.round(cm[i].dep - cm[i].arr - (nextSD ? (depCn === null || depCn === void 0 ? void 0 : depCn.h) || 0 : 0)));
     }
     return {
       dayMap: dm,
@@ -1057,7 +1060,7 @@ function App() {
     aF: aF,
     sA: sA,
     onSA: a => {
-      setSA(sA.id === a.id ? null : a);
+      setSA((sA === null || sA === void 0 ? void 0 : sA.id) === a.id ? null : a);
       setSelC(null);
     },
     cTime: cTime,
@@ -1084,14 +1087,14 @@ function App() {
       t = rc[selLeg + 1];
     const cn = getConn(f.id, t.id);
     const cl = clockMap[selLeg];
-    const dep = cl.dep || 9;
-    const arr = dep + (cn.h || 0);
+    const dep = (cl === null || cl === void 0 ? void 0 : cl.dep) || 9;
+    const arr = dep + ((cn === null || cn === void 0 ? void 0 : cn.h) || 0);
     const st = stops.find(s => s.id === f.id);
     const sameD = dayMap[selLeg] === dayMap[selLeg + 1];
     return /*#__PURE__*/React.createElement("div", {
       style: {
         ...card,
-        borderLeft: `4px solid ${TCOL[cn.t || 0]}`
+        borderLeft: `4px solid ${TCOL[(cn === null || cn === void 0 ? void 0 : cn.t) || 0]}`
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
@@ -1104,11 +1107,11 @@ function App() {
         marginTop: 4,
         lineHeight: 1.8
       }
-    }, "\uD83D\uDE84 ", TNAME[cn.t || 0], " \xB7 ", cn.h || "?", "t", /*#__PURE__*/React.createElement("br", null), "\uD83D\uDD50 ~", Math.floor(dep), ":", String(Math.round(dep % 1 * 60)).padStart(2, "0"), " \u2192 ~", Math.floor(arr), ":", String(Math.round(arr % 1 * 60)).padStart(2, "0"), /*#__PURE__*/React.createElement("br", null), "\uD83D\uDCC5 Dag ", dayMap[selLeg], " \u2014 ", gd(dayMap[selLeg]), sameD ? " ☀️ Same dag" : "", cn.t === 2 ? " · 🌙 Nattog!" : "", cn.t >= 3 ? " · ® Res!" : "", /*#__PURE__*/React.createElement("br", null), "\u23F1\uFE0F Min. byttetid: ", mt, " min", /*#__PURE__*/React.createElement("br", null), st.tn ? `🎫 Tog: ${st.tn}` : "🎫 Skriv inn tognr i ⚡", /*#__PURE__*/React.createElement("br", null), st.pl ? `🚉 Plattform: ${st.pl}` : "🚉 Skriv inn i ⚡"));
+    }, "\uD83D\uDE84 ", TNAME[(cn === null || cn === void 0 ? void 0 : cn.t) || 0], " \xB7 ", (cn === null || cn === void 0 ? void 0 : cn.h) || "?", "t", /*#__PURE__*/React.createElement("br", null), "\uD83D\uDD50 ~", Math.floor(dep), ":", String(Math.round(dep % 1 * 60)).padStart(2, "0"), " \u2192 ~", Math.floor(arr), ":", String(Math.round(arr % 1 * 60)).padStart(2, "0"), /*#__PURE__*/React.createElement("br", null), "\uD83D\uDCC5 Dag ", dayMap[selLeg], " \u2014 ", gd(dayMap[selLeg]), sameD ? " ☀️ Same dag" : "", (cn === null || cn === void 0 ? void 0 : cn.t) === 2 ? " · 🌙 Nattog!" : "", (cn === null || cn === void 0 ? void 0 : cn.t) >= 3 ? " · ® Res!" : "", /*#__PURE__*/React.createElement("br", null), "\u23F1\uFE0F Min. byttetid: ", mt, " min", /*#__PURE__*/React.createElement("br", null), st !== null && st !== void 0 && st.tn ? `🎫 Tog: ${st.tn}` : "🎫 Skriv inn tognr i ⚡", /*#__PURE__*/React.createElement("br", null), st !== null && st !== void 0 && st.pl ? `🚉 Plattform: ${st.pl}` : "🚉 Skriv inn i ⚡"));
   })(), sA && /*#__PURE__*/React.createElement("div", {
     style: {
       ...card,
-      borderLeft: `4px solid ${ATYPES.find(t => t.k === sA.ty).c}`
+      borderLeft: `4px solid ${(_ATYPES$find2 = ATYPES.find(t => t.k === sA.ty)) === null || _ATYPES$find2 === void 0 ? void 0 : _ATYPES$find2.c}`
     }
   }, /*#__PURE__*/React.createElement("b", null, sA.n), " \xB7 ", sA.ci, " \xB7 ", sA.d), sc && !sA && selLeg == null && /*#__PURE__*/React.createElement("div", {
     style: card
@@ -1120,15 +1123,18 @@ function App() {
         borderTop: "1px solid #eee",
         paddingTop: 4
       }
-    }, ca.map(a => /*#__PURE__*/React.createElement("div", {
-      key: a.id,
-      style: {
-        fontSize: 10,
-        padding: "1px 0",
-        cursor: "pointer"
-      },
-      onClick: () => setSA(a)
-    }, "\u2022 ", /*#__PURE__*/React.createElement("b", null, a.n), " (", ATYPES.find(t => t.k === a.ty).l, ") \u2014 ", a.d))) : null;
+    }, ca.map(a => {
+      var _ATYPES$find3;
+      return /*#__PURE__*/React.createElement("div", {
+        key: a.id,
+        style: {
+          fontSize: 10,
+          padding: "1px 0",
+          cursor: "pointer"
+        },
+        onClick: () => setSA(a)
+      }, "\u2022 ", /*#__PURE__*/React.createElement("b", null, a.n), " (", (_ATYPES$find3 = ATYPES.find(t => t.k === a.ty)) === null || _ATYPES$find3 === void 0 ? void 0 : _ATYPES$find3.l, ") \u2014 ", a.d);
+    })) : null;
   })()), /*#__PURE__*/React.createElement("button", {
     onClick: () => dlGPX(route),
     style: {
@@ -1261,7 +1267,7 @@ function App() {
       borderRadius: 6,
       marginBottom: 6
     }
-  }, "\u2708\uFE0F ", sC ? `${C.find(c => c.id === sC).n}: ~€${FLY[sC] || "??"}` : "—", " \u2192 ", eC ? `${C.find(c => c.id === eC).n}: ~€${FLY[eC] || "??"}` : "—"), /*#__PURE__*/React.createElement("div", {
+  }, "\u2708\uFE0F ", sC ? `${(_C$find = C.find(c => c.id === sC)) === null || _C$find === void 0 ? void 0 : _C$find.n}: ~€${FLY[sC] || "??"}` : "—", " \u2192 ", eC ? `${(_C$find2 = C.find(c => c.id === eC)) === null || _C$find2 === void 0 ? void 0 : _C$find2.n}: ~€${FLY[eC] || "??"}` : "—"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 3,
@@ -1354,7 +1360,7 @@ function App() {
       const ji = route.indexOf(did);
       if (ji > 0 && dayMap[ji] === dayMap[ji - 1]) {
         const cc = getConn(route[ji - 1], did);
-        return a + (cc.h || 0);
+        return a + ((cc === null || cc === void 0 ? void 0 : cc.h) || 0);
       }
       return a;
     }, 0);
@@ -1468,7 +1474,7 @@ function App() {
         flexWrap: "wrap"
       }
     }, /*#__PURE__*/React.createElement("input", {
-      value: st.tn || "",
+      value: (st === null || st === void 0 ? void 0 : st.tn) || "",
       onChange: e => setF(si, "tn", e.target.value),
       placeholder: "Tog nr",
       style: {
@@ -1479,7 +1485,7 @@ function App() {
         fontSize: 9
       }
     }), /*#__PURE__*/React.createElement("input", {
-      value: st.pl || "",
+      value: (st === null || st === void 0 ? void 0 : st.pl) || "",
       onChange: e => setF(si, "pl", e.target.value),
       placeholder: "Plattf.",
       style: {
@@ -1495,13 +1501,13 @@ function App() {
         fontSize: 9,
         padding: "3px 8px",
         borderRadius: 6,
-        border: `2px solid ${st.sd ? "#059669" : "#ddd"}`,
-        background: st.sd ? "#e8f5e9" : "white",
-        color: st.sd ? "#059669" : "#888",
+        border: `2px solid ${st !== null && st !== void 0 && st.sd ? "#059669" : "#ddd"}`,
+        background: st !== null && st !== void 0 && st.sd ? "#e8f5e9" : "white",
+        color: st !== null && st !== void 0 && st.sd ? "#059669" : "#888",
         cursor: "pointer",
         fontWeight: 700
       }
-    }, "\u2600\uFE0F ", st.sd ? "Same dag ✓" : "Same dag?"), /*#__PURE__*/React.createElement("button", {
+    }, "\u2600\uFE0F ", st !== null && st !== void 0 && st.sd ? "Same dag ✓" : "Same dag?"), /*#__PURE__*/React.createElement("button", {
       onClick: () => setSt([...stops, {
         id,
         days: 1,
@@ -1645,7 +1651,7 @@ function App() {
       let c = 0;
       for (let i = 0; i < n - 1; i++) {
         const cn = getConn(route[i], route[i + 1]);
-        if (cn.t === 2) c++;
+        if ((cn === null || cn === void 0 ? void 0 : cn.t) === 2) c++;
       }
       return c;
     })();
