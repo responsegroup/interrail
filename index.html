@@ -351,7 +351,7 @@ function topoFeature(topo, obj) {
   };
 }
 const EU_IDS = new Set(["756", "040", "276", "380", "705", "191", "348", "703", "203", "616", "528", "056", "250", "724", "208", "440", "428", "233", "826", "578", "752", "246", "642", "100", "688", "499", "070", "008", "807", "804", "112", "498", "620", "300"]);
-function Map({
+function MapView({
   rc,
   selId,
   onSel,
@@ -1045,7 +1045,7 @@ function App() {
       padding: 0,
       overflow: "hidden"
     }
-  }, /*#__PURE__*/React.createElement(Map, {
+  }, /*#__PURE__*/React.createElement(MapView, {
     rc: rc,
     selId: selC,
     onSel: id => {
