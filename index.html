@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Interrail Planleggar</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#e6ebe0;overflow-x:hidden;min-height:100vh;width:100vw}
@@ -23,7 +27,7 @@ const {
   useCallback
 } = React;
 /* Interrail Reiseplanleggar v8 */
-const _C = [["sion", "Sion", "🇨🇭", 46.228, 7.359, 0, 3, 0, "Start"], ["zermatt", "Zermatt", "🇨🇭", 46.024, 7.748, 85, 7, 0, "Matterhorn"], ["geneve", "Genève", "🇨🇭", 46.204, 6.143, 145, 7, "GVA", "CERN"], ["montreux", "Montreux", "🇨🇭", 46.431, 6.911, 125, 6, 0, "GoldenPass"], ["interlaken", "Interlaken", "🇨🇭", 46.686, 7.863, 125, 7, 0, "Jungfrau"], ["bern", "Bern", "🇨🇭", 46.948, 7.447, 135, 6, 0, "Hovudstad"], ["luzern", "Luzern", "🇨🇭", 47.05, 8.309, 138, 7, 0, "Verkehrshaus!"], ["zurich", "Zürich", "🇨🇭", 47.377, 8.542, 150, 7, "ZRH", "ETH"], ["basel", "Basel", "🇨🇭", 47.559, 7.589, 140, 7, "BSL", "40+ museum"], ["chur", "Chur", "🇨🇭", 46.85, 9.532, 109, 5, 0, "Bernina start"], ["stmoritz", "St. Moritz", "🇨🇭", 46.497, 9.838, 143, 6, 0, "Glacier/Bernina"], ["lauterbrunnen", "Lauterbrunnen", "🇨🇭", 46.593, 7.909, 120, 8, 0, "72 fossar!"], ["wengen", "Wengen", "🇨🇭", 46.608, 7.922, 130, 7, 0, "Bilfri alpeby"], ["lugano", "Lugano", "🇨🇭", 46.003, 8.951, 125, 6, 0, "Gotthard"], ["locarno", "Locarno", "🇨🇭", 46.171, 8.799, 115, 5, 0, "Centovalli"], ["innsbruck", "Innsbruck", "🇦🇹", 47.263, 11.401, 148, 8, 0, "Nordkette"], ["salzburg", "Salzburg", "🇦🇹", 47.813, 13.045, 105, 8, "SZG", "Hohensalzburg"], ["linz", "Linz", "🇦🇹", 48.306, 14.286, 92, 5, 0, "Ars Electronica"], ["wien", "Wien", "🇦🇹", 48.185, 16.377, 123, 10, "VIE", "Technisches Museum"], ["graz", "Graz", "🇦🇹", 47.073, 15.417, 101, 7, "GRZ", "32k våpen!"], ["klagenfurt", "Klagenfurt", "🇦🇹", 46.625, 14.309, 88, 4, 0, "Wörthersee"], ["villach", "Villach", "🇦🇹", 46.611, 13.856, 75, 3, 0, "Transit"], ["munchen", "München", "🇩🇪", 48.135, 11.582, 125, 9, "MUC", "Deutsches Museum!"], ["nurnberg", "Nürnberg", "🇩🇪", 49.452, 11.077, 106, 6, "NUE", "DB Museum"], ["stuttgart", "Stuttgart", "🇩🇪", 48.776, 9.183, 118, 7, "STR", "Mercedes+Porsche"], ["frankfurt", "Frankfurt", "🇩🇪", 50.111, 8.682, 120, 5, "FRA", "Knutepunkt"], ["koln", "Köln", "🇩🇪", 50.938, 6.96, 107, 7, "CGN", "Dom+Sjokolade"], ["dusseldorf", "Düsseldorf", "🇩🇪", 51.22, 6.793, 107, 6, "DUS", "Rheinufer"], ["hannover", "Hannover", "🇩🇪", 52.376, 9.738, 91, 5, "HAJ", "ICE-hub"], ["hamburg", "Hamburg", "🇩🇪", 53.551, 9.993, 113, 7, "HAM", "Miniatur Wunderland!"], ["berlin", "Berlin", "🇩🇪", 52.52, 13.405, 108, 10, "BER", "Museum Island"], ["dresden", "Dresden", "🇩🇪", 51.051, 13.738, 96, 7, "DRS", "Zwinger"], ["leipzig", "Leipzig", "🇩🇪", 51.34, 12.375, 86, 6, 0, "Bach"], ["freiburg", "Freiburg", "🇩🇪", 47.999, 7.842, 96, 5, 0, "Svartskogen"], ["erfurt", "Erfurt", "🇩🇪", 50.978, 11.029, 82, 5, 0, "ICE-hub"], ["rostock", "Rostock", "🇩🇪", 54.089, 12.14, 78, 4, 0, "Østersjøen"], ["bolzano", "Bolzano", "🇮🇹", 46.498, 11.355, 100, 6, 0, "Ötzi!"], ["verona", "Verona", "🇮🇹", 45.438, 10.992, 98, 7, 0, "Arena"], ["venezia", "Venezia", "🇮🇹", 45.441, 12.316, 130, 9, "VCE", "San Marco"], ["padova", "Padova", "🇮🇹", 45.407, 11.876, 85, 5, 0, "30min Venezia"], ["bologna", "Bologna", "🇮🇹", 44.494, 11.347, 95, 6, "BLQ", "Mat-by"], ["firenze", "Firenze", "🇮🇹", 43.771, 11.254, 114, 9, "FLR", "Uffizi"], ["roma", "Roma", "🇮🇹", 41.901, 12.502, 118, 10, "FCO", "Colosseum"], ["napoli", "Napoli", "🇮🇹", 40.852, 14.268, 80, 7, "NAP", "Pompeii"], ["milano", "Milano", "🇮🇹", 45.464, 9.19, 113, 8, "MXP", "Duomo"], ["torino", "Torino", "🇮🇹", 45.07, 7.687, 90, 6, "TRN", "Egyptisk museum"], ["trieste", "Trieste", "🇮🇹", 45.65, 13.777, 90, 5, 0, "Miramare"], ["tirano", "Tirano", "🇮🇹", 46.217, 10.169, 73, 4, 0, "Bernina slutt"], ["ljubljana", "Ljubljana", "🇸🇮", 46.058, 14.512, 95, 8, "LJU", "Castle"], ["bled", "Lake Bled", "🇸🇮", 46.369, 14.11, 86, 7, 0, "Øykirke"], ["maribor", "Maribor", "🇸🇮", 46.555, 15.646, 70, 4, 0, "Vinby"], ["zagreb", "Zagreb", "🇭🇷", 45.815, 15.982, 74, 6, 0, "Broken Rel."], ["split", "Split", "🇭🇷", 43.509, 16.44, 75, 7, "SPU", "Diocletian"], ["rijeka", "Rijeka", "🇭🇷", 45.327, 14.442, 71, 4, 0, "Hamn"], ["sarajevo", "Sarajevo", "🇧🇦", 43.856, 18.413, 55, 6, 0, "Baščaršija"], ["budapest", "Budapest", "🇭🇺", 47.498, 19.04, 78, 9, "BUD", "Thermalbad"], ["pecs", "Pécs", "🇭🇺", 46.072, 18.233, 54, 5, 0, "Kulturhovudstad"], ["bratislava", "Bratislava", "🇸🇰", 48.159, 17.106, 60, 5, 0, "1t frå Wien"], ["zilina", "Žilina", "🇸🇰", 49.224, 18.74, 56, 4, 0, "Tatrane"], ["kosice", "Košice", "🇸🇰", 48.716, 21.261, 59, 6, "KSC", "Katedral"], ["poprad", "Poprad-Tatry", "🇸🇰", 49.06, 20.298, 57, 6, 0, "Høge Tatra"], ["praha", "Praha", "🇨🇿", 50.083, 14.417, 83, 9, "PRG", "Castle"], ["brno", "Brno", "🇨🇿", 49.195, 16.607, 68, 5, 0, "Špilberk"], ["olomouc", "Olomouc", "🇨🇿", 49.594, 17.251, 61, 6, 0, "UNESCO"], ["cesky_krumlov", "Č.Krumlov", "🇨🇿", 48.811, 14.317, 66, 7, 0, "Eventyrby"], ["krakow", "Kraków", "🇵🇱", 50.065, 19.945, 62, 8, "KRK", "Wawel"], ["warszawa", "Warszawa", "🇵🇱", 52.23, 21.012, 70, 7, "WAW", "Copernicus"], ["wroclaw", "Wrocław", "🇵🇱", 51.097, 17.037, 60, 6, 0, "Dvergar!"], ["gdansk", "Gdańsk", "🇵🇱", 54.352, 18.647, 63, 7, "GDN", "Wizz Air!"], ["poznan", "Poznań", "🇵🇱", 52.407, 16.925, 58, 5, 0, "Gamleby"], ["amsterdam", "Amsterdam", "🇳🇱", 52.379, 4.9, 135, 9, "AMS", "Rijksmuseum"], ["bruxelles", "Bruxelles", "🇧🇪", 50.847, 4.357, 110, 7, "BRU", "Atomium"], ["paris", "Paris", "🇫🇷", 48.857, 2.352, 130, 10, "CDG", "Louvre"], ["strasbourg", "Strasbourg", "🇫🇷", 48.573, 7.752, 100, 6, 0, "EU-parlament"], ["lyon", "Lyon", "🇫🇷", 45.764, 4.835, 105, 7, "LYS", "Mat-by"], ["marseille", "Marseille", "🇫🇷", 43.296, 5.37, 100, 6, "MRS", "Calanques"], ["nice", "Nice", "🇫🇷", 43.71, 7.262, 110, 7, "NCE", "Côte d'Azur"], ["barcelona", "Barcelona", "🇪🇸", 41.389, 2.159, 108, 9, "BCN", "Sagrada Familia"], ["madrid", "Madrid", "🇪🇸", 40.417, -3.704, 95, 8, "MAD", "Prado"], ["kobenhavn", "København", "🇩🇰", 55.676, 12.568, 128, 9, "CPH", "Tivoli"], ["aarhus", "Aarhus", "🇩🇰", 56.153, 10.21, 109, 6, 0, "ARoS"], ["stockholm", "Stockholm", "🇸🇪", 59.329, 18.069, 130, 8, "ARN", "Vasa"], ["goteborg", "Göteborg", "🇸🇪", 57.709, 11.974, 115, 6, "GOT", "Liseberg"], ["malmo", "Malmö", "🇸🇪", 55.605, 13.0, 110, 5, 0, "Øresund"], ["oslo", "Oslo", "🇳🇴", 59.913, 10.752, 140, 7, "OSL", "Munch"], ["vilnius", "Vilnius", "🇱🇹", 54.687, 25.28, 58, 7, "VNO", "Gamleby"], ["riga", "Riga", "🇱🇻", 56.95, 24.105, 58, 7, "RIX", "Art Nouveau"], ["tallinn", "Tallinn", "🇪🇪", 59.437, 24.753, 68, 8, "TLL", "Middelalder"], ["bucuresti", "București", "🇷🇴", 44.432, 26.104, 54, 6, "OTP", "Folkets palass"], ["beograd", "Beograd", "🇷🇸", 44.787, 20.457, 47, 6, "BEG", "Kalemegdan"]];
+const _C = [["sion", "Sion", "🇨🇭", 46.228, 7.359, 0, 3, 0, "Start"], ["zermatt", "Zermatt", "🇨🇭", 46.024, 7.748, 85, 7, 0, "Matterhorn"], ["geneve", "Genève", "🇨🇭", 46.204, 6.143, 145, 7, "GVA", "CERN"], ["montreux", "Montreux", "🇨🇭", 46.431, 6.911, 125, 6, 0, "GoldenPass"], ["interlaken", "Interlaken", "🇨🇭", 46.686, 7.863, 125, 7, 0, "Jungfrau"], ["bern", "Bern", "🇨🇭", 46.948, 7.447, 135, 6, 0, "Hovudstad"], ["luzern", "Luzern", "🇨🇭", 47.05, 8.309, 138, 7, 0, "Verkehrshaus!"], ["zurich", "Zürich", "🇨🇭", 47.377, 8.542, 150, 7, "ZRH", "ETH"], ["basel", "Basel", "🇨🇭", 47.559, 7.589, 140, 7, "BSL", "40+ museum"], ["chur", "Chur", "🇨🇭", 46.85, 9.532, 109, 5, 0, "Bernina start"], ["stmoritz", "St. Moritz", "🇨🇭", 46.497, 9.838, 143, 6, 0, "Glacier/Bernina"], ["lauterbrunnen", "Lauterbrunnen", "🇨🇭", 46.593, 7.909, 120, 8, 0, "72 fossar!"], ["wengen", "Wengen", "🇨🇭", 46.608, 7.922, 130, 7, 0, "Bilfri alpeby"], ["lugano", "Lugano", "🇨🇭", 46.003, 8.951, 125, 6, 0, "Gotthard"], ["locarno", "Locarno", "🇨🇭", 46.171, 8.799, 115, 5, 0, "Centovalli"], ["innsbruck", "Innsbruck", "🇦🇹", 47.263, 11.401, 148, 8, 0, "Nordkette"], ["salzburg", "Salzburg", "🇦🇹", 47.813, 13.045, 105, 8, "SZG", "Hohensalzburg"], ["linz", "Linz", "🇦🇹", 48.306, 14.286, 92, 5, 0, "Ars Electronica"], ["wien", "Wien", "🇦🇹", 48.185, 16.377, 123, 10, "VIE", "Technisches Museum"], ["graz", "Graz", "🇦🇹", 47.073, 15.417, 101, 7, "GRZ", "32k våpen!"], ["klagenfurt", "Klagenfurt", "🇦🇹", 46.625, 14.309, 88, 4, 0, "Wörthersee"], ["villach", "Villach", "🇦🇹", 46.611, 13.856, 75, 3, 0, "Transit"], ["munchen", "München", "🇩🇪", 48.135, 11.582, 125, 9, "MUC", "Deutsches Museum!"], ["nurnberg", "Nürnberg", "🇩🇪", 49.452, 11.077, 106, 6, "NUE", "DB Museum"], ["stuttgart", "Stuttgart", "🇩🇪", 48.776, 9.183, 118, 7, "STR", "Mercedes+Porsche"], ["frankfurt", "Frankfurt", "🇩🇪", 50.111, 8.682, 120, 5, "FRA", "Knutepunkt"], ["koln", "Köln", "🇩🇪", 50.938, 6.96, 107, 7, "CGN", "Dom+Sjokolade"], ["dusseldorf", "Düsseldorf", "🇩🇪", 51.22, 6.793, 107, 6, "DUS", "Rheinufer"], ["hannover", "Hannover", "🇩🇪", 52.376, 9.738, 91, 5, "HAJ", "ICE-hub"], ["hamburg", "Hamburg", "🇩🇪", 53.551, 9.993, 113, 7, "HAM", "Miniatur Wunderland!"], ["berlin", "Berlin", "🇩🇪", 52.52, 13.405, 108, 10, "BER", "Museum Island"], ["dresden", "Dresden", "🇩🇪", 51.051, 13.738, 96, 7, "DRS", "Zwinger"], ["leipzig", "Leipzig", "🇩🇪", 51.34, 12.375, 86, 6, 0, "Bach"], ["freiburg", "Freiburg", "🇩🇪", 47.999, 7.842, 96, 5, 0, "Svartskogen"], ["erfurt", "Erfurt", "🇩🇪", 50.978, 11.029, 82, 5, 0, "ICE-hub"], ["rostock", "Rostock", "🇩🇪", 54.089, 12.14, 78, 4, 0, "Østersjøen"], ["bolzano", "Bolzano", "🇮🇹", 46.498, 11.355, 100, 6, 0, "Ötzi!"], ["verona", "Verona", "🇮🇹", 45.438, 10.992, 98, 7, 0, "Arena"], ["venezia", "Venezia", "🇮🇹", 45.441, 12.316, 130, 9, "VCE", "San Marco"], ["padova", "Padova", "🇮🇹", 45.407, 11.876, 85, 5, 0, "30min Venezia"], ["bologna", "Bologna", "🇮🇹", 44.494, 11.347, 95, 6, "BLQ", "Mat-by"], ["firenze", "Firenze", "🇮🇹", 43.771, 11.254, 114, 9, "FLR", "Uffizi"], ["roma", "Roma", "🇮🇹", 41.901, 12.502, 118, 10, "FCO", "Colosseum"], ["napoli", "Napoli", "🇮🇹", 40.852, 14.268, 80, 7, "NAP", "Pompeii"], ["milano", "Milano", "🇮🇹", 45.464, 9.19, 113, 8, "MXP", "Duomo"], ["torino", "Torino", "🇮🇹", 45.07, 7.687, 90, 6, "TRN", "Egyptisk museum"], ["trieste", "Trieste", "🇮🇹", 45.65, 13.777, 90, 5, 0, "Miramare"], ["tirano", "Tirano", "🇮🇹", 46.217, 10.169, 73, 4, 0, "Bernina slutt"], ["ljubljana", "Ljubljana", "🇸🇮", 46.058, 14.512, 95, 8, "LJU", "Castle"], ["bled", "Lake Bled", "🇸🇮", 46.369, 14.11, 86, 7, 0, "Øykirke"], ["maribor", "Maribor", "🇸🇮", 46.555, 15.646, 70, 4, 0, "Vinby"], ["zagreb", "Zagreb", "🇭🇷", 45.815, 15.982, 74, 6, 0, "Broken Rel."], ["split", "Split", "🇭🇷", 43.509, 16.44, 75, 7, "SPU", "Diocletian"], ["rijeka", "Rijeka", "🇭🇷", 45.327, 14.442, 71, 4, 0, "Hamn"], ["sarajevo", "Sarajevo", "🇧🇦", 43.856, 18.413, 55, 6, 0, "Baščaršija"], ["budapest", "Budapest", "🇭🇺", 47.498, 19.04, 78, 9, "BUD", "Thermalbad"], ["pecs", "Pécs", "🇭🇺", 46.072, 18.233, 54, 5, 0, "Kulturhovudstad"], ["bratislava", "Bratislava", "🇸🇰", 48.159, 17.106, 60, 5, 0, "1t frå Wien"], ["zilina", "Žilina", "🇸🇰", 49.224, 18.74, 56, 4, 0, "Tatrane"], ["kosice", "Košice", "🇸🇰", 48.716, 21.261, 59, 6, "KSC", "Katedral"], ["poprad", "Poprad-Tatry", "🇸🇰", 49.06, 20.298, 57, 6, 0, "Høge Tatra"], ["praha", "Praha", "🇨🇿", 50.083, 14.417, 83, 9, "PRG", "Castle"], ["brno", "Brno", "🇨🇿", 49.195, 16.607, 68, 5, 0, "Špilberk"], ["olomouc", "Olomouc", "🇨🇿", 49.594, 17.251, 61, 6, 0, "UNESCO"], ["cesky_krumlov", "Č.Krumlov", "🇨🇿", 48.811, 14.317, 66, 7, 0, "Eventyrby"], ["krakow", "Kraków", "🇵🇱", 50.065, 19.945, 62, 8, "KRK", "Wawel"], ["warszawa", "Warszawa", "🇵🇱", 52.23, 21.012, 70, 7, "WAW", "Copernicus"], ["wroclaw", "Wrocław", "🇵🇱", 51.097, 17.037, 60, 6, 0, "Dvergar!"], ["gdansk", "Gdańsk", "🇵🇱", 54.352, 18.647, 63, 7, "GDN", "Wizz Air!"], ["poznan", "Poznań", "🇵🇱", 52.407, 16.925, 58, 5, 0, "Gamleby"], ["amsterdam", "Amsterdam", "🇳🇱", 52.379, 4.9, 135, 9, "AMS", "Rijksmuseum"], ["bruxelles", "Bruxelles", "🇧🇪", 50.847, 4.357, 110, 7, "BRU", "Atomium"], ["paris", "Paris", "🇫🇷", 48.857, 2.352, 130, 10, "CDG", "Louvre"], ["strasbourg", "Strasbourg", "🇫🇷", 48.573, 7.752, 100, 6, 0, "EU-parlament"], ["lyon", "Lyon", "🇫🇷", 45.764, 4.835, 105, 7, "LYS", "Mat-by"], ["marseille", "Marseille", "🇫🇷", 43.296, 5.37, 100, 6, "MRS", "Calanques"], ["nice", "Nice", "🇫🇷", 43.71, 7.262, 110, 7, "NCE", "Côte d'Azur"], ["barcelona", "Barcelona", "🇪🇸", 41.389, 2.159, 108, 9, "BCN", "Sagrada Familia"], ["madrid", "Madrid", "🇪🇸", 40.417, -3.704, 95, 8, "MAD", "Prado"], ["kobenhavn", "København", "🇩🇰", 55.676, 12.568, 128, 9, "CPH", "Tivoli"], ["aarhus", "Aarhus", "🇩🇰", 56.153, 10.21, 109, 6, 0, "ARoS"], ["stockholm", "Stockholm", "🇸🇪", 59.329, 18.069, 130, 8, "ARN", "Vasa"], ["goteborg", "Göteborg", "🇸🇪", 57.709, 11.974, 115, 6, "GOT", "Liseberg"], ["malmo", "Malmö", "🇸🇪", 55.605, 13.0, 110, 5, 0, "Øresund"], ["oslo", "Oslo", "🇳🇴", 59.913, 10.752, 140, 7, "OSL", "Munch"], ["bergen", "Bergen", "🇳🇴", 60.391, 5.324, 160, 7, "BGO", "Bryggen UNESCO"], ["trondheim", "Trondheim", "🇳🇴", 63.431, 10.395, 140, 6, "TRD", "Nidarosdomen"], ["stavanger", "Stavanger", "🇳🇴", 58.97, 5.733, 145, 5, "SVG", "Preikestolen"], ["vilnius", "Vilnius", "🇱🇹", 54.687, 25.28, 58, 7, "VNO", "Gamleby"], ["riga", "Riga", "🇱🇻", 56.95, 24.105, 58, 7, "RIX", "Art Nouveau"], ["tallinn", "Tallinn", "🇪🇪", 59.437, 24.753, 68, 8, "TLL", "Middelalder"], ["bucuresti", "București", "🇷🇴", 44.432, 26.104, 54, 6, "OTP", "Folkets palass"], ["beograd", "Beograd", "🇷🇸", 44.787, 20.457, 47, 6, "BEG", "Kalemegdan"]];
 const C = _C.map(c => ({
   id: c[0],
   n: c[1],
@@ -35,7 +39,7 @@ const C = _C.map(c => ({
   ap: c[7],
   no: c[8]
 }));
-const CN = [["sion", "zermatt", 2, 4], ["sion", "bern", 1.5, 0], ["sion", "montreux", 1.5, 0], ["sion", "geneve", 2, 0], ["geneve", "montreux", 1, 0], ["geneve", "bern", 2, 0], ["geneve", "lyon", 2, 3], ["geneve", "paris", 3.5, 3], ["montreux", "interlaken", 3, 4], ["interlaken", "bern", 1, 0], ["interlaken", "luzern", 2, 0], ["interlaken", "lauterbrunnen", .3, 4], ["lauterbrunnen", "wengen", .2, 4], ["bern", "zurich", 1, 1], ["bern", "luzern", 1, 0], ["luzern", "zurich", .75, 0], ["luzern", "milano", 3.5, 0], ["luzern", "lugano", 2.5, 0], ["zurich", "chur", 1.25, 0], ["zurich", "innsbruck", 3.5, 0], ["zurich", "munchen", 3.5, 1], ["zurich", "stuttgart", 2.5, 1], ["zurich", "freiburg", 2, 0], ["zurich", "paris", 4, 3], ["zurich", "berlin", 8, 2], ["zurich", "basel", .9, 1], ["basel", "bern", 1, 1], ["basel", "freiburg", .75, 0], ["basel", "strasbourg", 1.25, 1], ["basel", "frankfurt", 3, 1], ["basel", "paris", 3.25, 3], ["chur", "stmoritz", 2, 4], ["chur", "tirano", 4.25, 4], ["stmoritz", "tirano", 2.5, 4], ["stmoritz", "chur", 2, 4], ["tirano", "milano", 2.5, 0], ["lugano", "locarno", .5, 0], ["lugano", "milano", 1.25, 1], ["innsbruck", "munchen", 1.75, 1], ["innsbruck", "salzburg", 1.75, 0], ["innsbruck", "bolzano", 1.25, 0], ["salzburg", "munchen", 1.5, 1], ["salzburg", "wien", 2.4, 1], ["salzburg", "linz", 1.25, 0], ["linz", "wien", 1.25, 1], ["wien", "bratislava", 1, 1], ["wien", "graz", 2.6, 0], ["wien", "budapest", 2.7, 1], ["wien", "praha", 4, 1], ["wien", "brno", 1.5, 0], ["wien", "hamburg", 11, 2], ["wien", "amsterdam", 13, 2], ["wien", "roma", 11, 2], ["wien", "venezia", 7.5, 2], ["graz", "villach", 2.5, 0], ["graz", "ljubljana", 3, 0], ["graz", "maribor", 1, 0], ["graz", "klagenfurt", 1, 0], ["klagenfurt", "villach", .5, 0], ["villach", "ljubljana", 2, 0], ["villach", "venezia", 4, 0], ["munchen", "nurnberg", 1, 1], ["munchen", "stuttgart", 2.25, 1], ["munchen", "praha", 5.5, 0], ["nurnberg", "erfurt", 1.25, 1], ["nurnberg", "frankfurt", 2, 1], ["nurnberg", "stuttgart", 2, 1], ["nurnberg", "praha", 4, 0], ["nurnberg", "leipzig", 3, 1], ["erfurt", "berlin", 1.75, 1], ["erfurt", "leipzig", .75, 1], ["erfurt", "frankfurt", 2.5, 1], ["stuttgart", "frankfurt", 1.25, 1], ["stuttgart", "freiburg", 2, 0], ["stuttgart", "paris", 3.5, 3], ["frankfurt", "koln", 1, 1], ["frankfurt", "berlin", 4, 1], ["frankfurt", "hannover", 2.25, 1], ["frankfurt", "paris", 4, 3], ["koln", "dusseldorf", .5, 1], ["koln", "amsterdam", 2.75, 1], ["koln", "bruxelles", 2, 1], ["koln", "paris", 3.5, 3], ["dusseldorf", "amsterdam", 2.5, 1], ["hannover", "hamburg", 1.25, 1], ["hannover", "berlin", 1.75, 1], ["hannover", "koln", 2.75, 1], ["hamburg", "berlin", 1.75, 1], ["hamburg", "kobenhavn", 4.75, 1], ["hamburg", "rostock", 2, 0], ["hamburg", "amsterdam", 5.5, 2], ["hamburg", "stockholm", 12, 2], ["berlin", "dresden", 2, 1], ["berlin", "leipzig", 1.25, 1], ["berlin", "praha", 4.5, 1], ["berlin", "amsterdam", 6.5, 1], ["berlin", "warszawa", 5.5, 1], ["berlin", "paris", 8, 2], ["berlin", "wien", 10, 2], ["dresden", "praha", 2.25, 0], ["leipzig", "dresden", 1.25, 1], ["rostock", "berlin", 2.5, 0], ["freiburg", "strasbourg", 1.5, 0], ["bolzano", "innsbruck", 1.25, 0], ["bolzano", "verona", 1.5, 0], ["verona", "venezia", 1.25, 1], ["verona", "milano", 1.5, 1], ["verona", "bologna", .9, 1], ["venezia", "padova", .5, 0], ["venezia", "bologna", 1.5, 1], ["venezia", "firenze", 2, 1], ["venezia", "trieste", 2, 0], ["padova", "bologna", 1.25, 1], ["bologna", "firenze", .6, 1], ["bologna", "roma", 2, 1], ["bologna", "milano", 1, 1], ["firenze", "roma", 1.5, 3], ["roma", "napoli", 1.1, 3], ["roma", "milano", 3, 3], ["milano", "torino", .75, 1], ["milano", "zurich", 3.5, 1], ["milano", "geneve", 4, 0], ["torino", "paris", 5.5, 3], ["torino", "lyon", 4, 3], ["trieste", "rijeka", 2, 0], ["trieste", "ljubljana", 2.5, 0], ["ljubljana", "bled", 1, 0], ["ljubljana", "zagreb", 2.25, 0], ["ljubljana", "maribor", 2, 0], ["ljubljana", "villach", 2, 0], ["zagreb", "budapest", 6, 0], ["zagreb", "rijeka", 3.5, 0], ["zagreb", "split", 5.5, 0], ["zagreb", "sarajevo", 9, 0], ["zagreb", "beograd", 6, 0], ["split", "sarajevo", 8, 0], ["rijeka", "trieste", 2, 0], ["budapest", "bratislava", 2.5, 1], ["budapest", "krakow", 7, 0], ["budapest", "praha", 7, 0], ["budapest", "beograd", 8, 0], ["budapest", "bucuresti", 10, 2], ["budapest", "pecs", 3, 0], ["pecs", "zagreb", 5, 0], ["bratislava", "brno", 1.5, 0], ["bratislava", "zilina", 2.5, 0], ["bratislava", "kosice", 5, 0], ["zilina", "kosice", 3, 0], ["zilina", "poprad", 1.5, 0], ["poprad", "kosice", 1.5, 0], ["praha", "brno", 2.5, 0], ["praha", "olomouc", 2.25, 0], ["praha", "dresden", 2.25, 0], ["praha", "krakow", 6.5, 0], ["praha", "zurich", 9, 2], ["brno", "olomouc", 1.25, 0], ["olomouc", "zilina", 2.5, 0], ["krakow", "warszawa", 2.5, 1], ["krakow", "wien", 6, 0], ["krakow", "wroclaw", 3.5, 0], ["warszawa", "gdansk", 3, 1], ["warszawa", "poznan", 2.5, 1], ["warszawa", "wroclaw", 4, 0], ["warszawa", "vilnius", 9, 0], ["warszawa", "berlin", 5.5, 1], ["wroclaw", "berlin", 4.5, 1], ["wroclaw", "praha", 4, 0], ["poznan", "berlin", 3, 1], ["gdansk", "warszawa", 3, 1], ["gdansk", "berlin", 5.5, 0], ["amsterdam", "bruxelles", 2, 1], ["bruxelles", "paris", 1.5, 3], ["paris", "lyon", 2, 3], ["paris", "strasbourg", 1.75, 3], ["paris", "marseille", 3.5, 3], ["paris", "barcelona", 6.5, 3], ["lyon", "marseille", 1.75, 3], ["lyon", "geneve", 2, 3], ["lyon", "torino", 4, 3], ["marseille", "nice", 2.5, 0], ["nice", "milano", 4.5, 0], ["barcelona", "madrid", 2.5, 3], ["kobenhavn", "malmo", .5, 0], ["kobenhavn", "aarhus", 3, 0], ["kobenhavn", "stockholm", 5, 1], ["kobenhavn", "hamburg", 4.75, 1], ["malmo", "goteborg", 2.5, 0], ["goteborg", "oslo", 3.5, 0], ["goteborg", "stockholm", 3, 1], ["oslo", "stockholm", 6, 0], ["vilnius", "riga", 4.5, 0], ["riga", "tallinn", 4.5, 0], ["tallinn", "stockholm", 16, 2], ["beograd", "bucuresti", 12, 0], ["bucuresti", "budapest", 10, 2]];
+const CN = [["sion", "zermatt", 2, 4], ["sion", "bern", 1.5, 0], ["sion", "montreux", 1.5, 0], ["sion", "geneve", 2, 0], ["geneve", "montreux", 1, 0], ["geneve", "bern", 2, 0], ["geneve", "lyon", 2, 3], ["geneve", "paris", 3.5, 3], ["montreux", "interlaken", 3, 4], ["interlaken", "bern", 1, 0], ["interlaken", "luzern", 2, 0], ["interlaken", "lauterbrunnen", .3, 4], ["lauterbrunnen", "wengen", .2, 4], ["bern", "zurich", 1, 1], ["bern", "luzern", 1, 0], ["luzern", "zurich", .75, 0], ["luzern", "milano", 3.5, 0], ["luzern", "lugano", 2.5, 0], ["zurich", "chur", 1.25, 0], ["zurich", "innsbruck", 3.5, 0], ["zurich", "munchen", 3.5, 1], ["zurich", "stuttgart", 2.5, 1], ["zurich", "freiburg", 2, 0], ["zurich", "paris", 4, 3], ["zurich", "berlin", 8, 2], ["zurich", "basel", .9, 1], ["basel", "bern", 1, 1], ["basel", "freiburg", .75, 0], ["basel", "strasbourg", 1.25, 1], ["basel", "frankfurt", 3, 1], ["basel", "paris", 3.25, 3], ["chur", "stmoritz", 2, 4], ["chur", "tirano", 4.25, 4], ["stmoritz", "tirano", 2.5, 4], ["stmoritz", "chur", 2, 4], ["tirano", "milano", 2.5, 0], ["lugano", "locarno", .5, 0], ["lugano", "milano", 1.25, 1], ["innsbruck", "munchen", 1.75, 1], ["innsbruck", "salzburg", 1.75, 0], ["innsbruck", "bolzano", 1.25, 0], ["salzburg", "munchen", 1.5, 1], ["salzburg", "wien", 2.4, 1], ["salzburg", "linz", 1.25, 0], ["linz", "wien", 1.25, 1], ["wien", "bratislava", 1, 1], ["wien", "graz", 2.6, 0], ["wien", "budapest", 2.7, 1], ["wien", "praha", 4, 1], ["wien", "brno", 1.5, 0], ["wien", "hamburg", 11, 2], ["wien", "amsterdam", 13, 2], ["wien", "roma", 11, 2], ["wien", "venezia", 7.5, 2], ["graz", "villach", 2.5, 0], ["graz", "ljubljana", 3, 0], ["graz", "maribor", 1, 0], ["graz", "klagenfurt", 1, 0], ["klagenfurt", "villach", .5, 0], ["villach", "ljubljana", 2, 0], ["villach", "venezia", 4, 0], ["munchen", "nurnberg", 1, 1], ["munchen", "stuttgart", 2.25, 1], ["munchen", "praha", 5.5, 0], ["nurnberg", "erfurt", 1.25, 1], ["nurnberg", "frankfurt", 2, 1], ["nurnberg", "stuttgart", 2, 1], ["nurnberg", "praha", 4, 0], ["nurnberg", "leipzig", 3, 1], ["erfurt", "berlin", 1.75, 1], ["erfurt", "leipzig", .75, 1], ["erfurt", "frankfurt", 2.5, 1], ["stuttgart", "frankfurt", 1.25, 1], ["stuttgart", "freiburg", 2, 0], ["stuttgart", "paris", 3.5, 3], ["frankfurt", "koln", 1, 1], ["frankfurt", "berlin", 4, 1], ["frankfurt", "hannover", 2.25, 1], ["frankfurt", "paris", 4, 3], ["koln", "dusseldorf", .5, 1], ["koln", "amsterdam", 2.75, 1], ["koln", "bruxelles", 2, 1], ["koln", "paris", 3.5, 3], ["dusseldorf", "amsterdam", 2.5, 1], ["hannover", "hamburg", 1.25, 1], ["hannover", "berlin", 1.75, 1], ["hannover", "koln", 2.75, 1], ["hamburg", "berlin", 1.75, 1], ["hamburg", "kobenhavn", 4.75, 1], ["hamburg", "rostock", 2, 0], ["hamburg", "amsterdam", 5.5, 2], ["hamburg", "stockholm", 12, 2], ["berlin", "dresden", 2, 1], ["berlin", "leipzig", 1.25, 1], ["berlin", "praha", 4.5, 1], ["berlin", "amsterdam", 6.5, 1], ["berlin", "warszawa", 5.5, 1], ["berlin", "paris", 8, 2], ["berlin", "wien", 10, 2], ["dresden", "praha", 2.25, 0], ["leipzig", "dresden", 1.25, 1], ["rostock", "berlin", 2.5, 0], ["freiburg", "strasbourg", 1.5, 0], ["bolzano", "innsbruck", 1.25, 0], ["bolzano", "verona", 1.5, 0], ["verona", "venezia", 1.25, 1], ["verona", "milano", 1.5, 1], ["verona", "bologna", .9, 1], ["venezia", "padova", .5, 0], ["venezia", "bologna", 1.5, 1], ["venezia", "firenze", 2, 1], ["venezia", "trieste", 2, 0], ["padova", "bologna", 1.25, 1], ["bologna", "firenze", .6, 1], ["bologna", "roma", 2, 1], ["bologna", "milano", 1, 1], ["firenze", "roma", 1.5, 3], ["roma", "napoli", 1.1, 3], ["roma", "milano", 3, 3], ["milano", "torino", .75, 1], ["milano", "zurich", 3.5, 1], ["milano", "geneve", 4, 0], ["torino", "paris", 5.5, 3], ["torino", "lyon", 4, 3], ["trieste", "rijeka", 2, 0], ["trieste", "ljubljana", 2.5, 0], ["ljubljana", "bled", 1, 0], ["ljubljana", "zagreb", 2.25, 0], ["ljubljana", "maribor", 2, 0], ["ljubljana", "villach", 2, 0], ["zagreb", "budapest", 6, 0], ["zagreb", "rijeka", 3.5, 0], ["zagreb", "split", 5.5, 0], ["zagreb", "sarajevo", 9, 0], ["zagreb", "beograd", 6, 0], ["split", "sarajevo", 8, 0], ["rijeka", "trieste", 2, 0], ["budapest", "bratislava", 2.5, 1], ["budapest", "krakow", 7, 0], ["budapest", "praha", 7, 0], ["budapest", "beograd", 8, 0], ["budapest", "bucuresti", 10, 2], ["budapest", "pecs", 3, 0], ["pecs", "zagreb", 5, 0], ["bratislava", "brno", 1.5, 0], ["bratislava", "zilina", 2.5, 0], ["bratislava", "kosice", 5, 0], ["zilina", "kosice", 3, 0], ["zilina", "poprad", 1.5, 0], ["poprad", "kosice", 1.5, 0], ["praha", "brno", 2.5, 0], ["praha", "olomouc", 2.25, 0], ["praha", "dresden", 2.25, 0], ["praha", "krakow", 6.5, 0], ["praha", "zurich", 9, 2], ["brno", "olomouc", 1.25, 0], ["olomouc", "zilina", 2.5, 0], ["krakow", "warszawa", 2.5, 1], ["krakow", "wien", 6, 0], ["krakow", "wroclaw", 3.5, 0], ["warszawa", "gdansk", 3, 1], ["warszawa", "poznan", 2.5, 1], ["warszawa", "wroclaw", 4, 0], ["warszawa", "vilnius", 9, 0], ["warszawa", "berlin", 5.5, 1], ["wroclaw", "berlin", 4.5, 1], ["wroclaw", "praha", 4, 0], ["poznan", "berlin", 3, 1], ["gdansk", "warszawa", 3, 1], ["gdansk", "berlin", 5.5, 0], ["amsterdam", "bruxelles", 2, 1], ["bruxelles", "paris", 1.5, 3], ["paris", "lyon", 2, 3], ["paris", "strasbourg", 1.75, 3], ["paris", "marseille", 3.5, 3], ["paris", "barcelona", 6.5, 3], ["lyon", "marseille", 1.75, 3], ["lyon", "geneve", 2, 3], ["lyon", "torino", 4, 3], ["marseille", "nice", 2.5, 0], ["nice", "milano", 4.5, 0], ["barcelona", "madrid", 2.5, 3], ["kobenhavn", "malmo", .5, 0], ["kobenhavn", "aarhus", 3, 0], ["kobenhavn", "stockholm", 5, 1], ["kobenhavn", "hamburg", 4.75, 1], ["malmo", "goteborg", 2.5, 0], ["goteborg", "oslo", 3.5, 0], ["goteborg", "stockholm", 3, 1], ["oslo", "stockholm", 6, 0], ["vilnius", "riga", 4.5, 0], ["riga", "tallinn", 4.5, 0], ["tallinn", "stockholm", 16, 2], ["beograd", "bucuresti", 12, 0], ["bucuresti", "budapest", 10, 2], ["bergen", "oslo", 7, 4], ["oslo", "trondheim", 7, 0], ["stavanger", "oslo", 8, 0]];
 const ADJ = {};
 CN.forEach(([a, b, h, t]) => {
   if (!ADJ[a]) ADJ[a] = {};
@@ -131,8 +135,20 @@ const SCENIC = [{
   c: ["kobenhavn", "malmo", "goteborg", "oslo", "stockholm"],
   d: "Øresund+fjord.",
   cl: "#0ea5e9"
+}, {
+  id: "bergensbanen",
+  n: "🏔️ Bergensbanen",
+  c: ["bergen", "oslo"],
+  d: "Hardangervidda! 7t. Europas vakraste.",
+  cl: "#1d5bbf"
+}, {
+  id: "dovre",
+  n: "🏔️ Dovrebanen",
+  c: ["oslo", "trondheim"],
+  d: "Dovrefjell. 7t.",
+  cl: "#059669"
 }];
-const ATT = [["a1", "Technisches Museum", 48.19, 16.32, "Wien", "tech", "22,000m²"], ["a2", "Schönbrunn", 48.185, 16.312, "Wien", "arch", "Keiserpalass"], ["a3", "Styrian Armoury", 47.07, 15.44, "Graz", "history", "32k våpen!"], ["a4", "Ljubljana Castle", 46.049, 14.508, "Ljubljana", "history", "Taubane"], ["a5", "Hohensalzburg", 47.795, 13.048, "Salzburg", "history", "Festning"], ["a6", "Haus der Natur", 47.802, 13.044, "Salzburg", "science", "Romhall"], ["a7", "Bergisel", 47.249, 11.396, "Innsbruck", "arch", "Zaha Hadid"], ["a8", "Deutsches Museum", 48.13, 11.583, "München", "tech", "Verdas største!"], ["a9", "BMW Welt", 48.177, 11.556, "München", "tech", "Gratis!"], ["a10", "Technical Museum", 50.097, 14.425, "Praha", "tech", "Fly, tog"], ["a11", "Prague Castle", 50.091, 14.4, "Praha", "history", "Største borg"], ["a12", "Széchenyi", 47.519, 19.082, "Budapest", "nature", "Termalbad"], ["a13", "Parlamentet", 47.507, 19.045, "Budapest", "arch", "UNESCO"], ["a14", "Wawel", 50.054, 19.935, "Kraków", "history", "Kongeleg slott"], ["a15", "Wieliczka", 49.984, 20.055, "Kraków", "history", "Saltgruve!"], ["a16", "Ötzi", 46.499, 11.351, "Bolzano", "science", "5300 år!"], ["a17", "Verkehrshaus", 47.053, 8.337, "Luzern", "tech", "Transport!"], ["a18", "Ars Electronica", 48.309, 14.285, "Linz", "tech", "Framtid"], ["a19", "Mercedes-Benz", 48.788, 9.234, "Stuttgart", "tech", "160 bilar"], ["a20", "Porsche", 48.834, 9.152, "Stuttgart", "tech", "Sportsbil"], ["a21", "DB Museum", 49.446, 11.085, "Nürnberg", "tech", "Jernbane!"], ["a22", "Museum Island", 52.517, 13.402, "Berlin", "art", "UNESCO"], ["a23", "Miniatur Wunderland", 53.544, 9.989, "Hamburg", "tech", "Modelljernbane!"], ["a24", "Rijksmuseum", 52.36, 4.885, "Amsterdam", "art", "Rembrandt"], ["a25", "Anne Frank", 52.375, 4.884, "Amsterdam", "history", "WWII"], ["a26", "Colosseum", 41.89, 12.492, "Roma", "history", "Amfiteater"], ["a27", "Vatikanmusea", 41.906, 12.454, "Roma", "art", "Sixtinske"], ["a28", "Uffizi", 43.768, 11.255, "Firenze", "art", "Botticelli"], ["a29", "Duomo", 43.773, 11.256, "Firenze", "arch", "Brunelleschi"], ["a30", "Louvre", 48.861, 2.336, "Paris", "art", "Mest besøkte"], ["a31", "Eiffel", 48.858, 2.294, "Paris", "arch", "324m"], ["a32", "Sagrada Familia", 41.404, 2.174, "Barcelona", "arch", "Gaudí"], ["a33", "Tivoli", 55.674, 12.569, "København", "nature", "Sidan 1843"], ["a34", "Vasa-museet", 59.328, 18.091, "Stockholm", "history", "1628-skip"], ["a35", "Tallinn Old Town", 59.438, 24.745, "Tallinn", "history", "Middelalder"], ["a36", "Art Nouveau", 56.955, 24.115, "Riga", "arch", "800+ bygg"], ["a37", "Copernicus", 52.242, 21.028, "Warszawa", "science", "Interaktivt"], ["a38", "Da Vinci", 45.463, 9.171, "Milano", "tech", "Leonardo"], ["a39", "Pompeii", 40.75, 14.485, "Napoli", "history", "Under oske"], ["a40", "CERN", 46.234, 6.055, "Genève", "science", "Partiklar!"], ["a41", "Kunstmuseum", 47.554, 7.593, "Basel", "art", "Sidan 1661"], ["a42", "Vitra Design", 47.605, 7.611, "Basel", "arch", "Gehry+Hadid"], ["a43", "Einstein", 46.948, 7.44, "Bern", "science", "Relativitet!"], ["a44", "Kunsthaus", 47.37, 8.548, "Zürich", "art", "Munch"], ["a45", "Palazzo Ducale", 45.434, 12.34, "Venezia", "history", "Sighs Bridge"], ["a46", "Zwinger", 51.053, 13.734, "Dresden", "art", "Madonna"], ["a47", "Kölner Dom", 50.941, 6.958, "Köln", "arch", "157m!"], ["a48", "Sjokolademuseum", 50.932, 6.964, "Köln", "tech", "Lindt!"], ["a49", "Atomium", 50.895, 4.342, "Bruxelles", "arch", "102m"], ["a50", "Vigeland", 59.927, 10.7, "Oslo", "art", "212 skulpturar"], ["a51", "Munchmuseet", 59.907, 10.756, "Oslo", "art", "Skrik"], ["a52", "Prado", 40.414, -3.692, "Madrid", "art", "Goya"], ["a53", "Arena", 45.439, 10.994, "Verona", "history", "Opera!"], ["a54", "Staubbach", 46.593, 7.906, "Lauterbrunnen", "nature", "297m! Tolkien"], ["a55", "Jungfraujoch", 46.547, 7.985, "Wengen", "nature", "3454m!"], ["a56", "Swissminiatur", 45.998, 8.943, "Lugano", "tech", "128 mini"]].map(a => ({
+const ATT = [["a1", "Technisches Museum", 48.19, 16.32, "Wien", "tech", "22,000m²"], ["a2", "Schönbrunn", 48.185, 16.312, "Wien", "arch", "Keiserpalass"], ["a3", "Styrian Armoury", 47.07, 15.44, "Graz", "history", "32k våpen!"], ["a4", "Ljubljana Castle", 46.049, 14.508, "Ljubljana", "history", "Taubane"], ["a5", "Hohensalzburg", 47.795, 13.048, "Salzburg", "history", "Festning"], ["a6", "Haus der Natur", 47.802, 13.044, "Salzburg", "science", "Romhall"], ["a7", "Bergisel", 47.249, 11.396, "Innsbruck", "arch", "Zaha Hadid"], ["a8", "Deutsches Museum", 48.13, 11.583, "München", "tech", "Verdas største!"], ["a9", "BMW Welt", 48.177, 11.556, "München", "tech", "Gratis!"], ["a10", "Technical Museum", 50.097, 14.425, "Praha", "tech", "Fly, tog"], ["a11", "Prague Castle", 50.091, 14.4, "Praha", "history", "Største borg"], ["a12", "Széchenyi", 47.519, 19.082, "Budapest", "nature", "Termalbad"], ["a13", "Parlamentet", 47.507, 19.045, "Budapest", "arch", "UNESCO"], ["a14", "Wawel", 50.054, 19.935, "Kraków", "history", "Kongeleg slott"], ["a15", "Wieliczka", 49.984, 20.055, "Kraków", "history", "Saltgruve!"], ["a16", "Ötzi", 46.499, 11.351, "Bolzano", "science", "5300 år!"], ["a17", "Verkehrshaus", 47.053, 8.337, "Luzern", "tech", "Transport!"], ["a18", "Ars Electronica", 48.309, 14.285, "Linz", "tech", "Framtid"], ["a19", "Mercedes-Benz", 48.788, 9.234, "Stuttgart", "tech", "160 bilar"], ["a20", "Porsche", 48.834, 9.152, "Stuttgart", "tech", "Sportsbil"], ["a21", "DB Museum", 49.446, 11.085, "Nürnberg", "tech", "Jernbane!"], ["a22", "Museum Island", 52.517, 13.402, "Berlin", "art", "UNESCO"], ["a23", "Miniatur Wunderland", 53.544, 9.989, "Hamburg", "tech", "Modelljernbane!"], ["a24", "Rijksmuseum", 52.36, 4.885, "Amsterdam", "art", "Rembrandt"], ["a25", "Anne Frank", 52.375, 4.884, "Amsterdam", "history", "WWII"], ["a26", "Colosseum", 41.89, 12.492, "Roma", "history", "Amfiteater"], ["a27", "Vatikanmusea", 41.906, 12.454, "Roma", "art", "Sixtinske"], ["a28", "Uffizi", 43.768, 11.255, "Firenze", "art", "Botticelli"], ["a29", "Duomo", 43.773, 11.256, "Firenze", "arch", "Brunelleschi"], ["a30", "Louvre", 48.861, 2.336, "Paris", "art", "Mest besøkte"], ["a31", "Eiffel", 48.858, 2.294, "Paris", "arch", "324m"], ["a32", "Sagrada Familia", 41.404, 2.174, "Barcelona", "arch", "Gaudí"], ["a33", "Tivoli", 55.674, 12.569, "København", "nature", "Sidan 1843"], ["a34", "Vasa-museet", 59.328, 18.091, "Stockholm", "history", "1628-skip"], ["a35", "Tallinn Old Town", 59.438, 24.745, "Tallinn", "history", "Middelalder"], ["a36", "Art Nouveau", 56.955, 24.115, "Riga", "arch", "800+ bygg"], ["a37", "Copernicus", 52.242, 21.028, "Warszawa", "science", "Interaktivt"], ["a38", "Da Vinci", 45.463, 9.171, "Milano", "tech", "Leonardo"], ["a39", "Pompeii", 40.75, 14.485, "Napoli", "history", "Under oske"], ["a40", "CERN", 46.234, 6.055, "Genève", "science", "Partiklar!"], ["a41", "Kunstmuseum", 47.554, 7.593, "Basel", "art", "Sidan 1661"], ["a42", "Vitra Design", 47.605, 7.611, "Basel", "arch", "Gehry+Hadid"], ["a43", "Einstein", 46.948, 7.44, "Bern", "science", "Relativitet!"], ["a44", "Kunsthaus", 47.37, 8.548, "Zürich", "art", "Munch"], ["a45", "Palazzo Ducale", 45.434, 12.34, "Venezia", "history", "Sighs Bridge"], ["a46", "Zwinger", 51.053, 13.734, "Dresden", "art", "Madonna"], ["a47", "Kölner Dom", 50.941, 6.958, "Köln", "arch", "157m!"], ["a48", "Sjokolademuseum", 50.932, 6.964, "Köln", "tech", "Lindt!"], ["a49", "Atomium", 50.895, 4.342, "Bruxelles", "arch", "102m"], ["a50", "Vigeland", 59.927, 10.7, "Oslo", "art", "212 skulpturar"], ["a51", "Munchmuseet", 59.907, 10.756, "Oslo", "art", "Skrik"], ["a52", "Prado", 40.414, -3.692, "Madrid", "art", "Goya"], ["a53", "Arena", 45.439, 10.994, "Verona", "history", "Opera!"], ["a54", "Staubbach", 46.593, 7.906, "Lauterbrunnen", "nature", "297m! Tolkien"], ["a55", "Jungfraujoch", 46.547, 7.985, "Wengen", "nature", "3454m!"], ["a56", "Swissminiatur", 45.998, 8.943, "Lugano", "tech", "128 mini"], ["a57", "Bryggen", 60.397, 5.325, "Bergen", "history", "UNESCO hanseby"], ["a58", "Fløibanen", 60.396, 5.329, "Bergen", "nature", "Fjordutsikt 320m"], ["a59", "Nidarosdomen", 63.427, 10.397, "Trondheim", "history", "Nordlegaste gotisk"], ["a60", "Preikestolen", 58.986, 6.188, "Stavanger", "nature", "604m over fjorden"]].map(a => ({
   id: a[0],
   n: a[1],
   lat: a[2],
@@ -185,7 +201,11 @@ const FLY = {
   paris: 130,
   milano: 120,
   basel: 110,
-  geneve: 100
+  geneve: 100,
+  bergen: 0,
+  oslo: 50,
+  trondheim: 60,
+  stavanger: 50
 };
 const COL = {
   m: "#c53d1b",
@@ -370,11 +390,17 @@ function MapView({
   const [gD, setGD] = useState(null);
   const w = 720,
     h = 480;
+  const [mapErr, setMapErr] = useState(false);
   const [_mInit] = useState(() => {
     setTimeout(() => {
-      fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(r => r.json()).then(t => {
+      fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(r => {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      }).then(t => {
         setGD(topoFeature(t, t.objects.countries).features.filter(f => EU_IDS.has(String(f.id))));
-      }).catch(() => {});
+      }).catch(() => {
+        setMapErr(true);
+      });
     }, 0);
     return 1;
   });
@@ -430,7 +456,13 @@ function MapView({
       stroke: "#b0b8a8",
       strokeWidth: .5
     }) : null;
-  }) : /*#__PURE__*/React.createElement("text", {
+  }) : mapErr ? /*#__PURE__*/React.createElement("text", {
+    x: w / 2,
+    y: h / 2,
+    textAnchor: "middle",
+    fill: "#888",
+    fontSize: 10
+  }, "Kart utilgjengeleg \u2014 ruta visast framleis") : /*#__PURE__*/React.createElement("text", {
     x: w / 2,
     y: h / 2,
     textAnchor: "middle",
@@ -629,10 +661,97 @@ const EMPTY = {
   stops: [],
   mode: "smartest",
   sd: "2026-07-05",
-  mt: 15
+  mt: 15,
+  cl: 1
 };
+const BOOK = {
+  "🇳🇴": {
+    n: "Vy",
+    u: "https://www.vy.no/"
+  },
+  "🇸🇪": {
+    n: "SJ",
+    u: "https://www.sj.se/"
+  },
+  "🇩🇰": {
+    n: "DSB",
+    u: "https://www.dsb.dk/"
+  },
+  "🇩🇪": {
+    n: "DB",
+    u: "https://www.bahn.de/"
+  },
+  "🇦🇹": {
+    n: "ÖBB",
+    u: "https://www.oebb.at/"
+  },
+  "🇨🇭": {
+    n: "SBB",
+    u: "https://www.sbb.ch/"
+  },
+  "🇮🇹": {
+    n: "Trenitalia",
+    u: "https://www.trenitalia.com/"
+  },
+  "🇫🇷": {
+    n: "SNCF",
+    u: "https://www.sncf-connect.com/"
+  },
+  "🇪🇸": {
+    n: "Renfe",
+    u: "https://www.renfe.com/"
+  },
+  "🇳🇱": {
+    n: "NS",
+    u: "https://www.ns.nl/"
+  },
+  "🇧🇪": {
+    n: "NMBS",
+    u: "https://www.belgiantrain.be/"
+  },
+  "🇨🇿": {
+    n: "ČD",
+    u: "https://www.cd.cz/"
+  },
+  "🇵🇱": {
+    n: "PKP",
+    u: "https://www.intercity.pl/"
+  },
+  "🇭🇺": {
+    n: "MÁV",
+    u: "https://www.mavcsoport.hu/"
+  },
+  "🇸🇰": {
+    n: "ZSSK",
+    u: "https://www.zssk.sk/"
+  },
+  "🇸🇮": {
+    n: "SŽ",
+    u: "https://potniski.sz.si/"
+  },
+  "🇭🇷": {
+    n: "HŽPP",
+    u: "https://www.hzpp.hr/"
+  }
+};
+const TLINE = "https://www.thetrainline.com/";
+function getBookLinks(fromCity, toCity) {
+  var _C$find, _C$find2;
+  const links = [];
+  const ff = (_C$find = C.find(c => c.id === fromCity)) === null || _C$find === void 0 ? void 0 : _C$find.f;
+  const tf = (_C$find2 = C.find(c => c.id === toCity)) === null || _C$find2 === void 0 ? void 0 : _C$find2.f;
+  const flags = new Set([ff, tf].filter(Boolean));
+  flags.forEach(f => {
+    if (BOOK[f]) links.push(BOOK[f]);
+  });
+  links.push({
+    n: "Trainline",
+    u: TLINE
+  });
+  return links;
+}
 function App() {
-  var _ATYPES$find2, _C$find, _C$find2;
+  var _ATYPES$find2, _C$find3, _C$find4;
   const [trips, setTrips] = useState([{
     ...EMPTY,
     n: "Mi reise"
@@ -678,7 +797,8 @@ function App() {
     eC = trip.e,
     mode = trip.mode,
     sd = trip.sd,
-    mt = trip.mt || 15;
+    mt = trip.mt || 15,
+    cl = trip.cl || 1;
   const [tab, setTab] = useState("route");
   const [selC, setSelC] = useState(null);
   const [zoom, setZoom] = useState(0);
@@ -1135,10 +1255,15 @@ function App() {
         onClick: () => setSA(a)
       }, "\u2022 ", /*#__PURE__*/React.createElement("b", null, a.n), " (", (_ATYPES$find3 = ATYPES.find(t => t.k === a.ty)) === null || _ATYPES$find3 === void 0 ? void 0 : _ATYPES$find3.l, ") \u2014 ", a.d);
     })) : null;
-  })()), /*#__PURE__*/React.createElement("button", {
+  })()), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("button", {
     onClick: () => dlGPX(route),
     style: {
-      width: "100%",
+      flex: 1,
       padding: "10px",
       background: "#1a1a2e",
       color: "white",
@@ -1148,7 +1273,51 @@ function App() {
       fontWeight: 700,
       cursor: "pointer"
     }
-  }, "\uD83D\uDCE5 GPX")), tab === "cities" && /*#__PURE__*/React.createElement(React.Fragment, null, byCC.map(([fl, cs]) => /*#__PURE__*/React.createElement("div", {
+  }, "\uD83D\uDCE5 GPX"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      let html = "<html><head><meta charset='utf-8'><title>" + trip.n + " — Reiseplan</title><style>body{font-family:Georgia,serif;max-width:700px;margin:30px auto;color:#1a1a2e;line-height:1.6}h1{border-bottom:3px solid #c53d1b;padding-bottom:8px}h2{color:#c53d1b;margin-top:24px;border-bottom:1px solid #ddd;padding-bottom:4px}.leg{color:#888;font-size:13px;margin:4px 0 12px 20px}.city{font-size:16px;font-weight:bold}.info{font-size:13px;color:#555;margin-left:20px}@media print{body{margin:0 15mm}}</style></head><body>";
+      html += "<h1>🚂 " + trip.n + "</h1><p>" + gd(1) + " — " + gd(totalDays) + " · " + route.length + " stopp · " + tT.toFixed(1) + "t reisetid · " + fmt(tC) + "</p>";
+      let prevDay = 0;
+      for (let i = 0; i < route.length; i++) {
+        const id = route[i];
+        const c = C.find(x => x.id === id);
+        if (!c) continue;
+        const day = dayMap[i];
+        const clk = clockMap[i];
+        const si = stops.findIndex(s => s.id === id);
+        const st = si >= 0 ? stops[si] : null;
+        if (day !== prevDay) {
+          html += "<h2>📅 Dag " + day + " — " + gd(day) + "</h2>";
+          prevDay = day;
+        }
+        html += "<div class='city'>" + c.f + " " + c.n + (c.ap ? " ✈" : "") + "</div>";
+        html += "<div class='info'>🕐 " + Math.floor(clk.arr) + ":" + String(Math.round(clk.arr % 1 * 60)).padStart(2, "0") + "–" + Math.floor(clk.dep) + ":" + String(Math.round(clk.dep % 1 * 60)).padStart(2, "0") + " · ⏱" + clk.free + "t fri" + (st !== null && st !== void 0 && st.tn ? " · Tog: " + st.tn : "") + (st !== null && st !== void 0 && st.pl ? " · Plf: " + st.pl : "") + "</div>";
+        if (i < route.length - 1) {
+          const cn = getConn(id, route[i + 1]);
+          const nc = C.find(x => x.id === route[i + 1]);
+          if (cn && nc) html += "<div class='leg'>↓ " + cn.h + "t " + TNAME[cn.t] + " → " + nc.f + nc.n + "</div>";
+        }
+      }
+      html += "</body></html>";
+      const w2 = window.open("", "_blank");
+      if (w2) {
+        w2.document.write(html);
+        w2.document.close();
+        w2.print();
+      }
+    },
+    style: {
+      flex: 1,
+      padding: "10px",
+      background: "#c53d1b",
+      color: "white",
+      border: "none",
+      borderRadius: 8,
+      fontSize: 12,
+      fontWeight: 700,
+      cursor: "pointer"
+    }
+  }, "\uD83D\uDDA8\uFE0F Reiseplan"))), tab === "cities" && /*#__PURE__*/React.createElement(React.Fragment, null, byCC.map(([fl, cs]) => /*#__PURE__*/React.createElement("div", {
     key: fl,
     style: card
   }, /*#__PURE__*/React.createElement("div", {
@@ -1267,7 +1436,7 @@ function App() {
       borderRadius: 6,
       marginBottom: 6
     }
-  }, "\u2708\uFE0F ", sC ? `${(_C$find = C.find(c => c.id === sC)) === null || _C$find === void 0 ? void 0 : _C$find.n}: ~€${FLY[sC] || "??"}` : "—", " \u2192 ", eC ? `${(_C$find2 = C.find(c => c.id === eC)) === null || _C$find2 === void 0 ? void 0 : _C$find2.n}: ~€${FLY[eC] || "??"}` : "—"), /*#__PURE__*/React.createElement("div", {
+  }, "\u2708\uFE0F ", sC ? `${(_C$find3 = C.find(c => c.id === sC)) === null || _C$find3 === void 0 ? void 0 : _C$find3.n}: ~€${FLY[sC] || "??"}` : "—", " \u2192 ", eC ? `${(_C$find4 = C.find(c => c.id === eC)) === null || _C$find4 === void 0 ? void 0 : _C$find4.n}: ~€${FLY[eC] || "??"}` : "—"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 3,
@@ -1544,21 +1713,43 @@ function App() {
         color: "#666",
         cursor: "pointer"
       }
-    }, "\uD83D\uDCA1", s.f, s.n, " (", s.h, "t)+"))), cn && (i < route.length - 1 && dayMap[i + 1] !== day ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        padding: "1px 0 1px 26px",
-        fontSize: 9,
-        color: TCOL[cn.t],
-        fontWeight: cn.t > 0 ? 600 : 400
-      }
-    }, "\uD83C\uDF05 \u2193 ", cn.h, "t ", TNAME[cn.t], " ", mt > 15 ? `· bytte≥${mt}m` : "") : dayMap[i + 1] === day ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        padding: "1px 0 1px 26px",
-        fontSize: 9,
-        color: "#059669",
-        fontWeight: 600
-      }
-    }, "\u2600\uFE0F \u2193 ", cn.h, "t same dag") : null));
+    }, "\uD83D\uDCA1", s.f, s.n, " (", s.h, "t)+"))), cn && (() => {
+      const blinks = getBookLinks(id, route[i + 1]);
+      const isDC = i < route.length - 1 && dayMap[i + 1] !== day;
+      const isSm = dayMap[i + 1] === day;
+      return /*#__PURE__*/React.createElement("div", {
+        style: {
+          padding: "1px 0 1px 26px"
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 9,
+          color: isDC ? TCOL[cn.t] : isSm ? "#059669" : "#888",
+          fontWeight: cn.t > 0 || isSm ? 600 : 400
+        }
+      }, isDC ? "🌅" : "☀️", " \u2193 ", cn.h, "t ", TNAME[cn.t], " ", isDC && mt > 15 ? `· bytte≥${mt}m` : "", isSm ? " same dag" : ""), /*#__PURE__*/React.createElement("div", {
+        style: {
+          display: "flex",
+          gap: 3,
+          flexWrap: "wrap",
+          marginTop: 1
+        }
+      }, blinks.map(b => /*#__PURE__*/React.createElement("a", {
+        key: b.n,
+        href: b.u,
+        target: "_blank",
+        rel: "noopener",
+        style: {
+          fontSize: 8,
+          padding: "1px 5px",
+          borderRadius: 6,
+          background: "#f0f4ff",
+          color: "#2563eb",
+          textDecoration: "none",
+          border: "1px solid #c7d2fe"
+        }
+      }, b.n, " \u2197"))));
+    })());
   }))), tab === "scenic" && /*#__PURE__*/React.createElement(React.Fragment, null, SCENIC.map(r => {
     const allIn = r.c.every(id => stops.find(s => s.id === id));
     return /*#__PURE__*/React.createElement("div", {
@@ -1671,35 +1862,65 @@ function App() {
       return t;
     })();
     const td = n - 1;
-    const ps = [{
+    const ps2 = [{
       n: "4d/1m",
       d: 4,
-      p: 246
+      p: 258
     }, {
       n: "5d/1m",
       d: 5,
-      p: 276
+      p: 298
     }, {
       n: "7d/1m",
       d: 7,
-      p: 296
+      p: 358
     }, {
       n: "10d/2m",
       d: 10,
-      p: 356
+      p: 418
     }, {
       n: "15d/2m",
       d: 15,
-      p: 416
+      p: 498
     }, {
       n: "1m",
       d: 30,
-      p: 496
+      p: 598
     }, {
       n: "3m",
       d: 90,
-      p: 676
+      p: 798
     }];
+    const ps1 = [{
+      n: "4d/1m",
+      d: 4,
+      p: 343
+    }, {
+      n: "5d/1m",
+      d: 5,
+      p: 396
+    }, {
+      n: "7d/1m",
+      d: 7,
+      p: 476
+    }, {
+      n: "10d/2m",
+      d: 10,
+      p: 556
+    }, {
+      n: "15d/2m",
+      d: 15,
+      p: 663
+    }, {
+      n: "1m",
+      d: 30,
+      p: 796
+    }, {
+      n: "3m",
+      d: 90,
+      p: 1063
+    }];
+    const ps = cl === 1 ? ps1 : ps2;
     const bp = ps.find(p => p.d >= td) || ps[ps.length - 1];
     const tot = ht + fd + ft + bp.p + rs + Math.round(mu);
     return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
@@ -1742,11 +1963,37 @@ function App() {
       style: card
     }, /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 13,
-        fontWeight: 700,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
         marginBottom: 6
       }
-    }, "\uD83C\uDFAB Pass (", td, " reisedagar)"), ps.map(p => {
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 13,
+        fontWeight: 700
+      }
+    }, "\uD83C\uDFAB Pass (", td, " reisedagar)"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 3
+      }
+    }, [[1, "1. kl"], [2, "2. kl"]].map(([v, l]) => /*#__PURE__*/React.createElement("button", {
+      key: v,
+      onClick: () => upd(() => ({
+        cl: v
+      })),
+      style: {
+        padding: "3px 10px",
+        borderRadius: 8,
+        fontSize: 10,
+        fontWeight: 700,
+        cursor: "pointer",
+        border: `2px solid ${cl === v ? "#c53d1b" : "#ddd"}`,
+        background: cl === v ? "#fdf0ec" : "white",
+        color: cl === v ? "#c53d1b" : "#666"
+      }
+    }, l)))), ps.map(p => {
       const r = p === bp;
       return /*#__PURE__*/React.createElement("div", {
         key: p.n,
@@ -1768,10 +2015,9 @@ function App() {
     })));
   })())));
 }
-
-// Mount the app
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(React.createElement(App));
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
 </script>
 </body>
 </html>
